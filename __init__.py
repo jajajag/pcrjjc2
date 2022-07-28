@@ -163,11 +163,11 @@ async def on_query_arena(bot, ev):
             last_login_str = time.strftime('%Y-%m-%d %H:%M:%S',last_login_date)
             
             await bot.finish(ev, 
-            f'''昵称：{res['user_info']["user_name"]}
-            jjc排名：{res['user_info']["arena_rank"]}
-            pjjc排名：{res['user_info']["grand_arena_rank"]}
-            最后登录：{last_login_str}
-            ''', at_sender=False)
+f'''昵称：{res['user_info']["user_name"]}
+jjc排名：{res['user_info']["arena_rank"]}
+pjjc排名：{res['user_info']["grand_arena_rank"]}
+最后登录：{last_login_str}
+''', at_sender=False)
         except ApiException as e:
             await bot.finish(ev, f'查询出错，{e}', at_sender=True)
 
