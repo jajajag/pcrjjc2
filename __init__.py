@@ -130,8 +130,11 @@ async def on_arena_bind(bot, ev):
             'id': ev['match'].group(1),
             'uid': uid,
             'gid': str(ev['group_id']),
-            'arena_on': last is None or last['arena_on'],
-            'grand_arena_on': last is None or last['grand_arena_on'],
+            # JAG: By default we do subscribe arena and grand_arena
+            #'arena_on': last is None or last['arena_on'],
+            'arena_on': False,
+            #'grand_arena_on': last is None or last['grand_arena_on'],
+            'grand_arena_on': False,
         }
         save_binds()
 
@@ -160,11 +163,11 @@ async def on_query_arena(bot, ev):
             last_login_str = time.strftime('%Y-%m-%d %H:%M:%S',last_login_date)
             
             await bot.finish(ev, 
-f'''昵称：{res['user_info']["user_name"]}
-jjc排名：{res['user_info']["arena_rank"]}
-pjjc排名：{res['user_info']["grand_arena_rank"]}
-最后登录：{last_login_str}
-''', at_sender=False)
+            f'''昵称：{res['user_info']["user_name"]}
+            jjc排名：{res['user_info']["arena_rank"]}
+            pjjc排名：{res['user_info']["grand_arena_rank"]}
+            最后登录：{last_login_str}
+            ''', at_sender=False)
         except ApiException as e:
             await bot.finish(ev, f'查询出错，{e}', at_sender=True)
 
@@ -185,17 +188,24 @@ async def on_query_arena_all(bot, ev):
                 id = binds[uid]['id']
         try:
             res = await query(id)
-            sv.logger.info('开始生成竞技场查询图片...') # 通过log显示信息
+            # 通过log显示信息
+            sv.logger.info('开始生成竞技场查询图片...')
             # result_image = await generate_info_pic(res, cx)
             result_image = await generate_info_pic(res)
-            result_image = pic2b64(result_image) # 转base64发送，不用将图片存本地
+            # 转base64发送，不用将图片存本地
+            result_image = pic2b64(result_image)
             result_image = MessageSegment.image(result_image)
-            result_support = await generate_support_pic(res)
-            result_support = pic2b64(result_support) # 转base64发送，不用将图片存本地
-            result_support = MessageSegment.image(result_support)
+            # JAG: Do NOT send support info
+            #result_support = await generate_support_pic(res)
+            # 转base64发送，不用将图片存本地
+            #result_support = pic2b64(result_support)
+            #result_support = MessageSegment.image(result_support)
             sv.logger.info('竞技场查询图片已准备完毕！')
             try:
-                await bot.finish(ev, f"\n{str(result_image)}\n{result_support}", at_sender=True)
+                #await bot.finish(ev,
+                #        f"\n{str(result_image)}\n{result_support}",
+                #        at_sender=True)
+                await bot.finish(ev, f"\n{str(result_image)}", at_sender=True)
             except Exception as e:
                 sv.logger.info("do nothing")
         except ApiException as e:
@@ -216,7 +226,8 @@ async def change_arena_sub(bot, ev):
             save_binds()
             await bot.finish(ev, f'{ev["match"].group(0)}成功', at_sender=True)
 
-# @on_command('/pcrval') # 台服建议注释掉该命令，以防止与b服的验证码输入产生冲突，导致验证码输入无响应。
+# 台服建议注释掉该命令，以防止与b服的验证码输入产生冲突，导致验证码输入无响应。
+# @on_command('/pcrval')
 async def validate(session):
     global binds, lck, validate
     client, acinfo = get_client()
@@ -266,7 +277,8 @@ async def send_arena_sub_status(bot,ev):
     公主竞技场订阅：{'开启' if info['grand_arena_on'] else '关闭'}''',at_sender=True)
 
 
-@sv.scheduled_job('interval', minutes=3) # minutes是刷新频率，可按自身服务器性能输入其他数值，可支持整数、小数
+# minutes是刷新频率，可按自身服务器性能输入其他数值，可支持整数、小数
+@sv.scheduled_job('interval', minutes=3)
 async def on_arena_schedule():
     global cache, binds, lck
     bot = get_bot()
@@ -280,9 +292,13 @@ async def on_arena_schedule():
     for user in bind_cache:
         info = bind_cache[user]
         try:
+            # JAG: Skip if both subscriptions are off
+            if (not info['arena_on']) and (not info['grand_arena_on']):
+                continue
             sv.logger.info(f'querying {info["id"]} for {info["uid"]}')
             res = await query(info['id'])
-            res = (res['user_info']['arena_rank'], res['user_info']['grand_arena_rank'])
+            res = (res['user_info']['arena_rank'],
+                    res['user_info']['grand_arena_rank'])
 
             if user not in cache:
                 cache[user] = res
@@ -294,13 +310,15 @@ async def on_arena_schedule():
             if res[0] > last[0] and info['arena_on']:
                 await bot.send_group_msg(
                     group_id = int(info['gid']),
-                    message = f'[CQ:at,qq={info["uid"]}]jjc：{last[0]}->{res[0]} ▼{res[0]-last[0]}'
+                    message = f'[CQ:at,qq={info["uid"]}]' \
+                            + 'jjc：{last[0]}->{res[0]} ▼{res[0]-last[0]}'
                 )
 
             if res[1] > last[1] and info['grand_arena_on']:
                 await bot.send_group_msg(
                     group_id = int(info['gid']),
-                    message = f'[CQ:at,qq={info["uid"]}]pjjc：{last[1]}->{res[1]} ▼{res[1]-last[1]}'
+                    message = f'[CQ:at,qq={info["uid"]}]' \
+                            + 'pjjc：{last[1]}->{res[1]} ▼{res[1]-last[1]}'
                 )
         except ApiException as e:
             sv.logger.info(f'对{info["id"]}的检查出错\n{format_exc()}')

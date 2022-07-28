@@ -134,7 +134,8 @@ class pcrclient:
                 data = crypted,
                 headers = self.headers,
                 timeout = 5,
-                proxies = self.proxy,
+                # JAG: Do NOT use proxy
+                #proxies = self.proxy,
                 verify = False)
             response = await resp.content
             
