@@ -12,6 +12,9 @@ import os
 import json
 
 from hoshino.aiorequests import post
+# Disbale alert
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # 获取headers
 def get_headers():
