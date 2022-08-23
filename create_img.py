@@ -9,7 +9,8 @@ try:
     from hoshino.modules.priconne._pcr_data import CHARA_NAME, CHARA_PROFILE
     # Find correct clan name using a new dict
     REAL_CHARA_NAME = {CHARA_NAME[i][0]: i  for i in CHARA_NAME}
-    REAL_CHARA_NAME = {i: i[:i.find('(')] if REAL_CHARA_NAME[i[:i.find('(')]] \
+    REAL_CHARA_NAME = {REAL_CHARA_NAME[i]: REAL_CHARA_NAME[i[:i.find('(')]] \
+            if i[:i.find('(')] in REAL_CHARA_NAME \
             else REAL_CHARA_NAME[i] for i in REAL_CHARA_NAME}
 except:
     # If not exist, use an empty dict instead
