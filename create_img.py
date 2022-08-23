@@ -30,7 +30,10 @@ def _generate_info_pic_internal(data):
     im = Image.open(path / 'img' / 'template.png') # 图片模板
     im_frame = Image.open(path / 'img' / 'frame.png') # 头像框
     try:
-        id_favorite = int(str(data['favorite_unit']['id'])[0:4]) # 截取第1位到第4位的字符
+        # 截取第1位到第4位的字符
+        id_favorite = int(str(data['favorite_unit']['id'])[0:4])
+        print(int(str(data['favorite_unit']['id']))
+        print(id_favorite)
     except:
         id_favorite = 1000 # 一个？角色
     pic_dir = chara.fromid(id_favorite).icon.path
@@ -62,7 +65,8 @@ def _generate_info_pic_internal(data):
     user_comment_arr = _cut_str(_TraditionalToSimplified(
         data["user_info"]["user_comment"]), 25)
     last_login_time_text = _TraditionalToSimplified(time.strftime(
-        "%Y/%m/%d %H:%M:%S", time.localtime(data["user_info"]["last_login_time"]))).split(' ')
+        "%Y/%m/%d %H:%M:%S", time.localtime(
+            data["user_info"]["last_login_time"]))).split(' ')
 
     draw.text((194, 120), user_name_text, font_black, font)
 
