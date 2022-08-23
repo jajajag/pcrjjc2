@@ -70,10 +70,8 @@ def _generate_info_pic_internal(data):
     # 资料卡 个人信息
     user_name_text = _TraditionalToSimplified(data["user_info"]["user_name"])
     # JAG: Change nick name to character name
-    if id_favorite in CHARA_NAME:
-        user_name_text = CHARA_NAME[id_favorite][0]
-    else:
-        user_name_text = '未知角色'
+    user_name_text = CHARA_NAME[id_favorite][0] \
+            if id_favorite in CHARA_NAME else '未知角色'
     team_level_text = _TraditionalToSimplified(data["user_info"]["team_level"])
     total_power_text = _TraditionalToSimplified(
         data["user_info"]["total_power"])
