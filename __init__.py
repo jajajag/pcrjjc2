@@ -15,6 +15,12 @@ import time
 import requests
 import os
 import json
+# JAG: Import character names from hoshino
+try:
+    from hoshino.modules.priconne._pcr_data import CHARA_NAME
+except:
+    # If not exist, use an empty dict instead
+    CHARA_NAME = {}
 
 sv_help = '''
 [竞技场绑定 uid] 绑定竞技场排名变动推送，默认双场均启用，仅排名降低时推送
@@ -161,9 +167,20 @@ async def on_query_arena(bot, ev):
             last_login_time = int (res['user_info']['last_login_time'])
             last_login_date = time.localtime(last_login_time)
             last_login_str = time.strftime('%Y-%m-%d %H:%M:%S',last_login_date)
+            # JAG: Change nick name to character name
+            try:
+                # 截取第1位到第4位的字符
+                id_favorite = int(str(data['favorite_unit']['id'])[0:4])
+            except:
+                id_favorite = 1000 # 一个？角色
+            if id_favorite in CHARA_NAME:
+                user_name_text = CHARA_NAME[id_favorite][0]
+            else:
+                user_name_text = '未知角色'
             
             await bot.finish(ev, 
-f'''昵称：{res['user_info']["user_name"]}
+#f'''昵称：{res['user_info']["user_name"]}
+f'''昵称：{user_name_text}
 jjc排名：{res['user_info']["arena_rank"]}
 pjjc排名：{res['user_info']["grand_arena_rank"]}
 最后登录：{last_login_str}
