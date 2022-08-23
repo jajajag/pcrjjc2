@@ -8,10 +8,9 @@ from hoshino.aiorequests import run_sync_func
 try:
     from hoshino.modules.priconne._pcr_data import CHARA_NAME, CHARA_PROFILE
     # Find correct clan name using a new dict
-    REVERSE_CHARA_NAME = {CHARA_NAME[i][0]: i  for i in CHARA_NAME}
-    REVERSE_CHARA_NAME = {i: i[:i.find('(')] \
-            if REVERSE_CHARA_NAME[i[:i.find('(')]] \
-            else REVERSE_CHARA_NAME[i] for i in REVERSE_CHARA_NAME}
+    REAL_CHARA_NAME = {CHARA_NAME[i][0]: i  for i in CHARA_NAME}
+    REAL_CHARA_NAME = {i: i[:i.find('(')] if REAL_CHARA_NAME[i[:i.find('(')]] \
+            else REAL_CHARA_NAME[i] for i in REAL_CHARA_NAME}
 except:
     # If not exist, use an empty dict instead
     CHARA_NAME, CHARA_PROFILE = {}, {}
@@ -79,10 +78,10 @@ def _generate_info_pic_internal(data):
         data["user_info"]["total_power"])
     clan_name_text = _TraditionalToSimplified(data["clan_name"])
     # JAG: Set clan name to game clan name
-    if id_favorite in REVERSE_CHARA_PROFILE \
-            and '公会' in CHARA_PROFILE[REVERSE_CHARA_PROFILE[id_favorite]]:
-        clan_name_text = CHARA_PROFILE[
-                REVERSE_CHARA_PROFILE[id_favorite]]['公会']
+    if id_favorite in REAL_CHARA_NAME \
+            and REAL_CHARA_NAME[id_favorite] in CHARA_PROFILE:
+            and '公会' in CHARA_PROFILE[REAL_CHARA_NAME[id_favorite]]:
+        clan_name_text = CHARA_PROFILE[REAL_CHARA_NAME[id_favorite]]['公会']
     else:
         clan_name_text = '？？？'
     user_comment_arr = _cut_str(_TraditionalToSimplified(
