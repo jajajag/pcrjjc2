@@ -79,7 +79,7 @@ def _generate_info_pic_internal(data):
     clan_name_text = _TraditionalToSimplified(data["clan_name"])
     # JAG: Set clan name to game clan name
     if id_favorite in REAL_CHARA_NAME \
-            and REAL_CHARA_NAME[id_favorite] in CHARA_PROFILE:
+            and REAL_CHARA_NAME[id_favorite] in CHARA_PROFILE \
             and '公会' in CHARA_PROFILE[REAL_CHARA_NAME[id_favorite]]:
         clan_name_text = CHARA_PROFILE[REAL_CHARA_NAME[id_favorite]]['公会']
     else:
