@@ -4,12 +4,12 @@ import time
 from pathlib import Path
 import zhconv
 from hoshino.aiorequests import run_sync_func
-# Import character names from hoshino
+# JAG: Import character names from hoshino
 try:
-    from hoshino.modules.priconne._pcr_data import CHARA_NAME
+    from hoshino.modules.priconne._pcr_data import CHARA_NAME, CHARA_PROFILE
 except:
     # If not exist, use an empty dict instead
-    CHARA_NAME = {}
+    CHARA_NAME, CHARA_PROFILE = {}, {}
 
 path = Path(__file__).parent # 获取文件所在目录的绝对路径
 font_cn_path = str(path / 'fonts' / 'SourceHanSansCN-Medium.otf')
@@ -64,7 +64,7 @@ def _generate_info_pic_internal(data):
 
     # 资料卡 个人信息
     user_name_text = _TraditionalToSimplified(data["user_info"]["user_name"])
-    # Change nick name to character name
+    # JAG: Change nick name to character name
     if id_favorite in CHARA_NAME:
         user_name_text = CHARA_NAME[id_favorite][0]
     else:
@@ -73,8 +73,15 @@ def _generate_info_pic_internal(data):
     total_power_text = _TraditionalToSimplified(
         data["user_info"]["total_power"])
     clan_name_text = _TraditionalToSimplified(data["clan_name"])
+    # JAG: Set clan name to game clan name
+    if id_favorite in CHARA_PROFILE and '公会' in CHARA_PROFILE[id_favorite]:
+        clan_name_text = CHARA_PROFILE[id_favorite]['公会']
+    else:
+        clan_name_text = '？？？'
     user_comment_arr = _cut_str(_TraditionalToSimplified(
         data["user_info"]["user_comment"]), 25)
+    # JAG: Set comment to default
+    user_comment_arr = '请多指教。'
     last_login_time_text = _TraditionalToSimplified(time.strftime(
         "%Y/%m/%d %H:%M:%S", time.localtime(
             data["user_info"]["last_login_time"]))).split(' ')
