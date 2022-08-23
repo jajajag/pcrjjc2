@@ -4,9 +4,16 @@ import time
 from pathlib import Path
 import zhconv
 from hoshino.aiorequests import run_sync_func
+# Import character names from hoshino
+try:
+    from hoshino.modules.priconne._pcr_data import CHARA_NAME
+except:
+    # If not exist, use an empty dict instead
+    CHARA_NAME = {}
 
 path = Path(__file__).parent # 获取文件所在目录的绝对路径
-font_cn_path = str(path / 'fonts' / 'SourceHanSansCN-Medium.otf')  # Path是路径对象，必须转为str之后ImageFont才能读取
+font_cn_path = str(path / 'fonts' / 'SourceHanSansCN-Medium.otf')
+# Path是路径对象，必须转为str之后ImageFont才能读取
 font_tw_path = str(path / 'fonts' / 'pcrtwfont.ttf')
 
 server_name = '真步真步王国' # 设置服务器名称
@@ -32,8 +39,6 @@ def _generate_info_pic_internal(data):
     try:
         # 截取第1位到第4位的字符
         id_favorite = int(str(data['favorite_unit']['id'])[0:4])
-        print(int(str(data['favorite_unit']['id']))
-        print(id_favorite)
     except:
         id_favorite = 1000 # 一个？角色
     pic_dir = chara.fromid(id_favorite).icon.path
@@ -49,7 +54,8 @@ def _generate_info_pic_internal(data):
     font = cn_font # 选择字体
     
     cn_font_resize = ImageFont.truetype(font_cn_path, 16)
-    # tw_font_resize = ImageFont.truetype(font_tw_path, 16) # 字体有点问题，暂时别用
+    # tw_font_resize = ImageFont.truetype(font_tw_path, 16)
+    # 字体有点问题，暂时别用
     
     font_resize = cn_font_resize #选择字体
 
@@ -58,6 +64,11 @@ def _generate_info_pic_internal(data):
 
     # 资料卡 个人信息
     user_name_text = _TraditionalToSimplified(data["user_info"]["user_name"])
+    # Change nick name to character name
+    if id_favorite in CHARA_NAME:
+        user_name_text = CHARA_NAME[id_favorite][0]
+    else:
+        user_name_text = '未知角色'
     team_level_text = _TraditionalToSimplified(data["user_info"]["team_level"])
     total_power_text = _TraditionalToSimplified(
         data["user_info"]["total_power"])
