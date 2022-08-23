@@ -81,7 +81,7 @@ def _generate_info_pic_internal(data):
     user_comment_arr = _cut_str(_TraditionalToSimplified(
         data["user_info"]["user_comment"]), 25)
     # JAG: Set comment to default
-    user_comment_arr = '请多指教。'
+    user_comment_arr = _cut_str('请多指教。', 25)
     last_login_time_text = _TraditionalToSimplified(time.strftime(
         "%Y/%m/%d %H:%M:%S", time.localtime(
             data["user_info"]["last_login_time"]))).split(' ')
