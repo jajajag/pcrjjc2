@@ -125,7 +125,8 @@ async def pcrjjc_del(bot, ev):
             save_binds()
             await bot.send(ev, f'已清空全部【{num}】个已订阅账号！')
 
-@sv.on_rex(r'^竞技场绑定 ?([2-4]\d{9})$')
+#@sv.on_rex(r'^竞技场绑定 ?([2-4]\d{9})$')
+@sv.on_rex(r'^竞技场绑定 ?(\d{9})$')
 async def on_arena_bind(bot, ev):
     global binds, lck
 
@@ -147,7 +148,8 @@ async def on_arena_bind(bot, ev):
 
     await bot.finish(ev, '竞技场绑定成功', at_sender=True)
 
-@sv.on_rex(r'^竞技场查询 ?([2-4]\d{9})?$')
+#@sv.on_rex(r'^竞技场查询 ?([2-4]\d{9})?$')
+@sv.on_rex(r'^竞技场查询 ?(\d{9})?$')
 async def on_query_arena(bot, ev):
     global binds, lck
 
@@ -183,7 +185,8 @@ pjjc排名：{res['user_info']["grand_arena_rank"]}
         except ApiException as e:
             await bot.finish(ev, f'查询出错，{e}', at_sender=True)
 
-@sv.on_rex(r'^详细查询 ?([2-4]\d{9})?$')
+#@sv.on_rex(r'^详细查询 ?([2-4]\d{9})?$')
+@sv.on_rex(r'^详细查询 ?(\d{9})?$')
 async def on_query_arena_all(bot, ev):
     global binds, lck
 
