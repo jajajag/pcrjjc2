@@ -43,10 +43,10 @@ def get_headers():
 
 # 获取版本号
 def get_ver():
-    app_url = 'https://sameapk.com/超異域公主連結！redive/'
+    app_url = 'https://apkcombo.com/公主連結/tw.sonet.princessconnect/'
     app_res = requests.get(app_url, timeout=15)#, proxies=pinfo['proxy'])
     soup = BeautifulSoup(app_res.text, 'lxml')
-    ver_tmp = soup.find('td', {"itemprop": "version"})
+    ver_tmp = soup.find('div', {"class": "version"})
     app_ver = ver_tmp.text.strip()
     return str(app_ver)
 
