@@ -181,8 +181,9 @@ def _generate_info_pic_internal(data):
               font_black, font_resize)
 
     # JAG: Display viewer_id in a proper way
-    viewer_id_arr = _cut_str(_TraditionalToSimplified(
-            data["user_info"]["viewer_id"]), 3)
+    #viewer_id_arr = _cut_str(_TraditionalToSimplified(
+    #        data["user_info"]["viewer_id"]), 3)
+    viewer_id_arr = f'{data["user_info"]["viewer_id"]:,}'.split(',')
     viewer_id_str = "  ".join(viewer_id_arr)
     w, h = font.getsize(viewer_id_str)
     draw.text((138 + (460 - 138) / 2 - w / 2, 1058), viewer_id_str,
