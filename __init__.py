@@ -86,8 +86,11 @@ qlck = Lock()
 
 # 获取配置文件
 def get_client():
-    acinfo = decryptxml(join(curpath, 'tw.sonet.princessconnect.v2.playerprefs.xml'))
-    client = pcrclient(acinfo['UDID'], acinfo['SHORT_UDID'], acinfo['VIEWER_ID'], acinfo['TW_SERVER_ID'], pinfo['proxy'])
+    acinfo = decryptxml(join(curpath,
+                             'tw.sonet.princessconnect.v2.playerprefs.xml'))
+    client = pcrclient(acinfo['UDID'], acinfo['SHORT_UDID_lowBits'],
+                       acinfo['VIEWER_ID_lowBits'], acinfo['TW_SERVER_ID'],
+                       pinfo['proxy'])
     return client, acinfo
 
 async def query(id: str):
