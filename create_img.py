@@ -95,7 +95,7 @@ def _generate_info_pic_internal(data):
     draw.text((194, 120), user_name_text, font_black, font)
 
     # JAG: 设置服务器名称
-    viewer_id = data["user_info"]["viewer_id"]
+    viewer_id = str(data["user_info"]["viewer_id"])
     if len(viewer_id) == 10 and viewer_id[0] == '2':
         server_name = '真步真步王国'
     elif len(viewer_id) == 10 and viewer_id[0] == '3':
@@ -183,7 +183,7 @@ def _generate_info_pic_internal(data):
     #viewer_id_arr = _cut_str(_TraditionalToSimplified(
     #    data["user_info"]["viewer_id"]), 3)
     # JAG: Display viewer_id in original form
-    viewer_id = data["user_info"]["viewer_id"]
+    viewer_id = str(data["user_info"]["viewer_id"])
     #w, h = font.getsize(
     #    viewer_id_arr[0] + "  " + viewer_id_arr[1] + "  " + viewer_id_arr[2])
     #draw.text((138 + (460 - 138) / 2 - w / 2, 1058),
