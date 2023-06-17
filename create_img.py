@@ -180,17 +180,13 @@ def _generate_info_pic_internal(data):
     draw.text((550 - w, 984), tower_cleared_ex_quest_count_text,
               font_black, font_resize)
 
-    #viewer_id_arr = _cut_str(_TraditionalToSimplified(
-    #    data["user_info"]["viewer_id"]), 3)
-    # JAG: Display viewer_id in original form
-    viewer_id = str(data["user_info"]["viewer_id"])
-    #w, h = font.getsize(
-    #    viewer_id_arr[0] + "  " + viewer_id_arr[1] + "  " + viewer_id_arr[2])
-    #draw.text((138 + (460 - 138) / 2 - w / 2, 1058),
-    #          viewer_id_arr[0] + "  " + viewer_id_arr[1] \
-    #                  + "  " + viewer_id_arr[2], (255, 255, 255, 255), font)
-    w, h = font.getsize(viewer_id)
-    draw.text((138 + (460 - 138) / 2 - w / 2, 1058), viewer_id,
+    # JAG: Display viewer_id in a proper way
+    viewer_id_len = 4 if data["user_info"]["viewer_id"] >= 1e9 else 3
+    viewer_id_arr = _cut_str(_TraditionalToSimplified(
+            data["user_info"]["viewer_id"]), viewer_id_len)
+    viewer_id_str = "  ".join(viewer_id_arr)
+    w, h = font.getsize(viewer_id_str)
+    draw.text((138 + (460 - 138) / 2 - w / 2, 1058), viewer_id_str,
               (255, 255, 255, 255), font)
 
     return im
