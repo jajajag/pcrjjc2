@@ -21,8 +21,6 @@ font_cn_path = str(path / 'fonts' / 'SourceHanSansCN-Medium.otf')
 # Path是路径对象，必须转为str之后ImageFont才能读取
 font_tw_path = str(path / 'fonts' / 'pcrtwfont.ttf')
 
-server_name = '真步真步王国' # 设置服务器名称
-
 def _TraditionalToSimplified(hant_str: str):
     '''
     Function: 将 hant_str 由繁体转化为简体
@@ -69,6 +67,7 @@ def _generate_info_pic_internal(data):
 
     # 资料卡 个人信息
     user_name_text = _TraditionalToSimplified(data["user_info"]["user_name"])
+
     # JAG: Change nick name to character name
     user_name_text = CHARA_NAME[id_favorite][0] \
             if id_favorite in CHARA_NAME else '未知角色'
@@ -76,6 +75,7 @@ def _generate_info_pic_internal(data):
     total_power_text = _TraditionalToSimplified(
         data["user_info"]["total_power"])
     clan_name_text = _TraditionalToSimplified(data["clan_name"])
+
     # JAG: Set clan name to game clan name
     if id_favorite in REAL_CHARA_NAME \
             and REAL_CHARA_NAME[id_favorite] in CHARA_PROFILE \
@@ -85,6 +85,7 @@ def _generate_info_pic_internal(data):
         clan_name_text = '？？？'
     user_comment_arr = _cut_str(_TraditionalToSimplified(
         data["user_info"]["user_comment"]), 25)
+
     # JAG: Set comment to default
     user_comment_arr = _cut_str('请多指教。', 25)
     last_login_time_text = _TraditionalToSimplified(time.strftime(
@@ -92,6 +93,17 @@ def _generate_info_pic_internal(data):
             data["user_info"]["last_login_time"]))).split(' ')
 
     draw.text((194, 120), user_name_text, font_black, font)
+
+    # JAG: 设置服务器名称
+    viewer_id = data["user_info"]["viewer_id"]
+    if len(viewer_id) == 10 and viewer_id[0] == '2':
+        server_name = '真步真步王国'
+    elif len(viewer_id) == 10 and viewer_id[0] == '3':
+        server_name = '破晓之星'
+    elif len(viewer_id) == 10 and viewer_id[0] == '4':
+        server_name = '小小甜心'
+    else:
+        server_name = '美食殿堂'
 
     w, h = font_resize.getsize(team_level_text)
     draw.text((568 - w, 168), team_level_text, font_black, font_resize)
@@ -168,13 +180,18 @@ def _generate_info_pic_internal(data):
     draw.text((550 - w, 984), tower_cleared_ex_quest_count_text,
               font_black, font_resize)
 
-    viewer_id_arr = _cut_str(_TraditionalToSimplified(
-        data["user_info"]["viewer_id"]), 3)
-
-    w, h = font.getsize(
-        viewer_id_arr[0] + "  " + viewer_id_arr[1] + "  " + viewer_id_arr[2])
-    draw.text((138 + (460 - 138) / 2 - w / 2, 1058),
-              viewer_id_arr[0] + "  " + viewer_id_arr[1] + "  " + viewer_id_arr[2], (255, 255, 255, 255), font)
+    #viewer_id_arr = _cut_str(_TraditionalToSimplified(
+    #    data["user_info"]["viewer_id"]), 3)
+    # JAG: Display viewer_id in original form
+    viewer_id = data["user_info"]["viewer_id"]
+    #w, h = font.getsize(
+    #    viewer_id_arr[0] + "  " + viewer_id_arr[1] + "  " + viewer_id_arr[2])
+    #draw.text((138 + (460 - 138) / 2 - w / 2, 1058),
+    #          viewer_id_arr[0] + "  " + viewer_id_arr[1] \
+    #                  + "  " + viewer_id_arr[2], (255, 255, 255, 255), font)
+    w, h = font.getsize(viewer_id)
+    draw.text((138 + (460 - 138) / 2 - w / 2, 1058), viewer_id,
+              (255, 255, 255, 255), font)
 
     return im
 
