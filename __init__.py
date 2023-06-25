@@ -90,7 +90,9 @@ client_cache = None
 
 # 获取配置文件
 def get_client():
+    # Forked from https://github.com/azmiao/pcrjjc_tw_new/commit/42346b79d9da112ad8fd84070e19729126c79899
     global client_cache
+    acinfo = {'admin': ''}
     if client_cache is None:
         acinfo = decryptxml(join(curpath,
                                  'tw.sonet.princessconnect.v2.playerprefs.xml'))
