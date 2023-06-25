@@ -84,13 +84,20 @@ lck = Lock()
 captcha_lck = Lock()
 qlck = Lock()
 
+# Forked from https://github.com/azmiao/pcrjjc_tw_new/commit/42346b79d9da112ad8fd84070e19729126c79899
+# 全局缓存的client登陆 | 减少协议握手次数
+client_cache = None
+
 # 获取配置文件
 def get_client():
-    acinfo = decryptxml(join(curpath,
-                             'tw.sonet.princessconnect.v2.playerprefs.xml'))
-    client = pcrclient(acinfo['UDID'], acinfo['SHORT_UDID_lowBits'],
-                       acinfo['VIEWER_ID_lowBits'], acinfo['TW_SERVER_ID'],
-                       pinfo['proxy'])
+    global client_cache
+    if client_cache is None:
+        acinfo = decryptxml(join(curpath,
+                                 'tw.sonet.princessconnect.v2.playerprefs.xml'))
+        client = pcrclient(acinfo['UDID'], acinfo['SHORT_UDID_lowBits'],
+                           acinfo['VIEWER_ID_lowBits'], acinfo['TW_SERVER_ID'],
+                           pinfo['proxy'])
+        client_cache = client
     return client, acinfo
 
 async def query(id: str):
