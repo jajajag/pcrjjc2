@@ -98,7 +98,7 @@ def get_client():
                            acinfo['VIEWER_ID_lowBits'], acinfo['TW_SERVER_ID'],
                            pinfo['proxy'])
         client_cache = client
-    return client, acinfo
+    return client_cache, acinfo
 
 async def query(id: str):
     client, acinfo = get_client()
