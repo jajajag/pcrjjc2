@@ -19,25 +19,26 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # 获取headers
 def get_headers():
     app_ver = get_ver()
+    # Forked from https://github.com/azmiao/pcrjjc_tw_new/commit/dbc10a39d35fe76e589010dec5b9eb0bfbd18ed4
     default_headers = {
-        'Accept-Encoding' : 'gzip',
-        'User-Agent' : 'Dalvik/2.1.0 (Linux, U, Android 5.1.1, PCRT00 Build/LMY48Z)',
+        'Accept-Encoding': 'deflate, gzip',
+        'User-Agent': 'UnityPlayer/2021.3.20f1 (UnityWebRequest/1.0, libcurl/7.84.0-DEV)',
         'Content-Type': 'application/octet-stream',
         'Expect': '100-continue',
-        'X-Unity-Version' : '2018.4.21f1',
-        'APP-VER' : app_ver,
-        'BATTLE-LOGIC-VERSION' : '4',
-        'BUNDLE-VER' : '',
-        'DEVICE' : '2',
-        'DEVICE-ID' : '7b1703a5d9b394e24051d7a5d4818f17',
-        'DEVICE-NAME' : 'OPPO PCRT00',
-        'GRAPHICS-DEVICE-NAME' : 'Adreno (TM) 640',
-        'IP-ADDRESS' : '10.0.2.15',
-        'KEYCHAIN' : '',
-        'LOCALE' : 'Jpn',
-        'PLATFORM-OS-VERSION' : 'Android OS 5.1.1 / API-22 (LMY48Z/rel.se.infra.20200612.100533)',
-        'REGION-CODE' : '',
-        'RES-VER' : '00017004'
+        'X-Unity-Version': '2021.3.20f1',
+        'APP-VER': app_ver,
+        'BATTLE-LOGIC-VERSION': '4',
+        'BUNDLE-VER': '',
+        'DEVICE': '2',
+        'DEVICE-ID': '7b1703a5d9b394e24051d7a5d4818f17',
+        'DEVICE-NAME': 'OPPO PCRM00',
+        'GRAPHICS-DEVICE-NAME': 'Adreno (TM) 640',
+        'IP-ADDRESS': '10.0.2.15',
+        'KEYCHAIN': '',
+        'LOCALE': 'Jpn',
+        'PLATFORM-OS-VERSION': 'Android OS 5.1.1 / API-22 (LMY48Z/rel.se.infra.20200612.100533)',
+        'REGION-CODE': '',
+        'RES-VER': '00150001'
     }
     return default_headers
 
