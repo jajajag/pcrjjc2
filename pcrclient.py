@@ -42,13 +42,22 @@ def get_headers():
     }
     return default_headers
 
-# 获取版本号
-def get_ver():
+# 获取版本号（APKCombo）
+def get_ver_apkcombo():
     app_url = 'https://apkcombo.com/公主連結/tw.sonet.princessconnect/'
     app_res = requests.get(app_url, timeout=15)#, proxies=pinfo['proxy'])
     soup = BeautifulSoup(app_res.text, 'lxml')
     ver_tmp = soup.find('div', {"class": "version"})
     app_ver = ver_tmp.text.strip()
+    return str(app_ver)
+
+# 获取版本号（App Store）
+def get_ver():
+    app_url = 'https://apps.apple.com/tw/app/超異域公主連結-re-dive/id1390473317'
+    app_res = requests.get(app_url, timeout=15)#, proxies=pinfo['proxy'])
+    soup = BeautifulSoup(app_res.text, 'lxml')
+    ver_tmp = soup.find('p', {"class": "whats-new__latest__version"})
+    app_ver = ver_tmp.text.strip().split()[-1]
     return str(app_ver)
 
 class ApiException(Exception):
