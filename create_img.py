@@ -33,7 +33,7 @@ def _cut_str(obj: str, sec: int):
     """
     return [obj[i: i+sec] for i in range(0, len(obj), sec)]
 
-def _generate_info_pic_internal(data):
+def _generate_info_pic_internal(data, pinfo):
     '''
     个人资料卡生成
     '''
