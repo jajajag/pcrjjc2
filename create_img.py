@@ -157,9 +157,9 @@ def _generate_info_pic_internal(data, pinfo):
     w, h = font_resize.getsize(normal_quest_text)
     draw.text((550 - w, 470), normal_quest_text, font_black, font_resize)
     w, h = font_resize.getsize("H" + hard_quest_text +
-                           " / VH" + very_hard_quest_text)
+                           "/VH" + very_hard_quest_text)
     draw.text((550 - w, 500), "H" + hard_quest_text +
-              " / VH", font_black, font_resize)
+              "/VH", font_black, font_resize)
     w, h = font_resize.getsize(very_hard_quest_text)
     draw.text((550 - w, 500), very_hard_quest_text, font_black, font_resize)
     w, h = font_resize.getsize(talent_quest_text)
