@@ -218,7 +218,7 @@ async def on_query_arena_all(bot, ev):
             # 通过log显示信息
             sv.logger.info('开始生成竞技场查询图片...')
             # result_image = await generate_info_pic(res, cx)
-            result_image = await generate_info_pic(res)
+            result_image = await generate_info_pic(res, pinfo)
             # 转base64发送，不用将图片存本地
             result_image = pic2b64(result_image)
             result_image = MessageSegment.image(result_image)
