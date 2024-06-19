@@ -33,6 +33,15 @@ def _cut_str(obj: str, sec: int):
     """
     return [obj[i: i+sec] for i in range(0, len(obj), sec)]
 
+def _calculate_knight_rank(value, experience_list):
+    """
+    计算公主骑士等级
+    """
+    for index, exp in enumerate(experience_list):
+        if value <= exp:
+            return index
+    return -1
+
 def _generate_info_pic_internal(data, pinfo):
     '''
     个人资料卡生成
@@ -74,6 +83,11 @@ def _generate_info_pic_internal(data, pinfo):
     team_level_text = _TraditionalToSimplified(data["user_info"]["team_level"])
     total_power_text = _TraditionalToSimplified(
         data["user_info"]["total_power"])
+    # JAG: Add princess_knight_rank
+    princess_knight_exp = data["user_info"]["princess_knight_rank_total_exp"]
+    princess_knight_rank = _calculate_knight_rank(
+            princess_knight_exp, pinfo['experience_knight_rank'])
+    princess_knight_rank_text = _TraditionalToSimplified(princess_knight_rank)
     clan_name_text = _TraditionalToSimplified(data["clan_name"])
 
     # JAG: Set clan name to game clan name
@@ -110,6 +124,9 @@ def _generate_info_pic_internal(data, pinfo):
     draw.text((568 - w, 170), team_level_text, font_black, font_resize)
     w, h = font_resize.getsize(total_power_text)
     draw.text((568 - w, 210), total_power_text, font_black, font_resize)
+    w, h = font_resize.getsize(princess_knight_rank_text)
+    draw.text((568 - w, 250), princess_knight_rank_text, font_black, 
+              font_resize)
     w, h = font_resize.getsize(clan_name_text)
     draw.text((568 - w, 290), clan_name_text, font_black, font_resize)
     # JAG: Do not display user comment
