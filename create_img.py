@@ -105,12 +105,13 @@ def _generate_info_pic_internal(data, pinfo):
     else:
         server_name = '美食殿堂'
 
+    # JAG: Original position for level and clan_name: 168, 250
     w, h = font_resize.getsize(team_level_text)
-    draw.text((568 - w, 168), team_level_text, font_black, font_resize)
+    draw.text((568 - w, 170), team_level_text, font_black, font_resize)
     w, h = font_resize.getsize(total_power_text)
     draw.text((568 - w, 210), total_power_text, font_black, font_resize)
     w, h = font_resize.getsize(clan_name_text)
-    draw.text((568 - w, 250), clan_name_text, font_black, font_resize)
+    draw.text((568 - w, 290), clan_name_text, font_black, font_resize)
     # JAG: Do not display user comment
     #for index, value in enumerate(user_comment_arr):
     #    draw.text((170, 310 + (index * 22)), value, font_black, font_resize)
@@ -127,14 +128,15 @@ def _generate_info_pic_internal(data, pinfo):
     very_hard_quest_text = _TraditionalToSimplified(
         data["quest_info"]["very_hard_quest"][2])
 
+    # JAG: Original position for quest_text: 498, 530
     w, h = font_resize.getsize(normal_quest_text)
-    draw.text((550 - w, 498), normal_quest_text, font_black, font_resize)
+    draw.text((550 - w, 466), normal_quest_text, font_black, font_resize)
     w, h = font_resize.getsize("H" + hard_quest_text +
                            " / VH" + very_hard_quest_text)
-    draw.text((550 - w, 530), "H" + hard_quest_text +
+    draw.text((550 - w, 498), "H" + hard_quest_text +
               " / VH", font_black, font_resize)
     w, h = font_resize.getsize(very_hard_quest_text)
-    draw.text((550 - w, 530), very_hard_quest_text, font_black, font_resize)
+    draw.text((550 - w, 498), very_hard_quest_text, font_black, font_resize)
 
     arena_group_text = _TraditionalToSimplified(
         data["user_info"]["arena_group"])
