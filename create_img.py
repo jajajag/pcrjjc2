@@ -87,7 +87,7 @@ def _generate_info_pic_internal(data, pinfo):
         data["user_info"]["user_comment"]), 25)
 
     # JAG: Set comment to default
-    user_comment_arr = _cut_str('请多指教。', 25)
+    #user_comment_arr = _cut_str('请多指教。', 25)
     last_login_time_text = _TraditionalToSimplified(time.strftime(
         "%Y/%m/%d %H:%M:%S", time.localtime(
             data["user_info"]["last_login_time"]))).split(' ')
@@ -111,11 +111,13 @@ def _generate_info_pic_internal(data, pinfo):
     draw.text((568 - w, 210), total_power_text, font_black, font_resize)
     w, h = font_resize.getsize(clan_name_text)
     draw.text((568 - w, 250), clan_name_text, font_black, font_resize)
-    for index, value in enumerate(user_comment_arr):
-        draw.text((170, 310 + (index * 22)), value, font_black, font_resize)
-    draw.text((34, 350), last_login_time_text[0] + "\n" +
+    # JAG: Do not display user comment
+    #for index, value in enumerate(user_comment_arr):
+    #    draw.text((170, 310 + (index * 22)), value, font_black, font_resize)
+    # JAG: Original position for last login time: 350, 392
+    draw.text((34, 330), last_login_time_text[0] + "\n" +
               last_login_time_text[1], font_black, font_resize)
-    draw.text((34, 392), server_name, font_black, font_resize)
+    draw.text((34, 372), server_name, font_black, font_resize)
 
     # 资料卡 冒险经历
     normal_quest_text = _TraditionalToSimplified(
