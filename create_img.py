@@ -149,7 +149,7 @@ def _generate_info_pic_internal(data, pinfo):
     talent_quest = data["quest_info"]["talent_quest"]
     talent_quest_sorted = sorted(talent_quest, key=lambda x: x['talent_id'])
     clear_count_list = [talent_list[i] \
-            + str(talent_quest_sorted['clear_count']) for i in range(5)]
+            + str(talent_quest_sorted[i]['clear_count']) for i in range(5)]
     talent_quest_text = _TraditionalToSimplified(
             ' / '.join(map(str, clear_count_list)))
 
