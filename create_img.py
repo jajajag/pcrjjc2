@@ -151,7 +151,7 @@ def _generate_info_pic_internal(data, pinfo):
     clear_count_list = [talent_list[i] \
             + str(talent_quest_sorted[i]['clear_count']) for i in range(5)]
     talent_quest_text = _TraditionalToSimplified(
-            ' / '.join(map(str, clear_count_list)))
+            '/'.join(map(str, clear_count_list)))
 
     # JAG: Original position for the text: 498, 530
     w, h = font_resize.getsize(normal_quest_text)
