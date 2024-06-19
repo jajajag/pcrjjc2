@@ -144,16 +144,26 @@ def _generate_info_pic_internal(data, pinfo):
         data["quest_info"]["hard_quest"][2])
     very_hard_quest_text = _TraditionalToSimplified(
         data["quest_info"]["very_hard_quest"][2])
+    # JAG: Add talent_quest
+    talent_list = ["火", "水", "风", "光", "暗"]
+    talent_quest = data["quest_info"]["talent_quest"]
+    talent_quest_sorted = sorted(talent_quest, key=lambda x: x['talent_id'])
+    clear_count_list = [talent_list[i] \
+            + str(talent_quest_sorted['clear_count']) for i in range(5)]
+    talent_quest_text = _TraditionalToSimplified(
+            ' / '.join(map(str, clear_count_list)))
 
-    # JAG: Original position for quest_text: 498, 530
+    # JAG: Original position for the text: 498, 530
     w, h = font_resize.getsize(normal_quest_text)
-    draw.text((550 - w, 466), normal_quest_text, font_black, font_resize)
+    draw.text((550 - w, 470), normal_quest_text, font_black, font_resize)
     w, h = font_resize.getsize("H" + hard_quest_text +
                            " / VH" + very_hard_quest_text)
-    draw.text((550 - w, 498), "H" + hard_quest_text +
+    draw.text((550 - w, 500), "H" + hard_quest_text +
               " / VH", font_black, font_resize)
     w, h = font_resize.getsize(very_hard_quest_text)
-    draw.text((550 - w, 498), very_hard_quest_text, font_black, font_resize)
+    draw.text((550 - w, 500), very_hard_quest_text, font_black, font_resize)
+    w, h = font_resize.getsize(talent_quest_text)
+    draw.text((550 - w, 530), talent_quest_text, font_black, font_resize)
 
     arena_group_text = _TraditionalToSimplified(
         data["user_info"]["arena_group"])
