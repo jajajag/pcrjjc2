@@ -378,5 +378,6 @@ async def update_ver():
     with open(header_path, 'w', encoding='UTF-8') as f:
         json.dump(default_headers, f, indent=4, ensure_ascii=False)
     # Clear the cache
+    global client_cache
     client_cache = None
     sv.logger.info(f'pcr-jjc2-tw的游戏版本已更新至最新') 
