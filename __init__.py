@@ -372,7 +372,11 @@ async def leave_notice(session: NoticeSession):
 @sv.scheduled_job('cron', hour='18', minute='1')
 async def update_ver():
     header_path = os.path.join(os.path.dirname(__file__), 'headers.json')
-    default_headers = get_headers()
+    new_headers = get_headers()
+    # JAG: Return if the version in the header is not updated
+    if new_headers['APP-VER'] == default_headers['APP-VER']: return
     with open(header_path, 'w', encoding='UTF-8') as f:
         json.dump(default_headers, f, indent=4, ensure_ascii=False)
+    # Clear the cache
+    client_cache = None
     sv.logger.info(f'pcr-jjc2-tw的游戏版本已更新至最新') 
