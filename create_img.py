@@ -68,7 +68,7 @@ def _generate_info_pic_internal(data, pinfo):
     user_name_text = _TraditionalToSimplified(data["user_info"]["user_name"])
 
     # JAG: Change nick name to character name
-    user_name_text = chara.fromid(id_favorite).name()
+    user_name_text = chara.fromid(id_favorite).name
     team_level_text = _TraditionalToSimplified(data["user_info"]["team_level"])
     total_power_text = _TraditionalToSimplified(
         data["user_info"]["total_power"])
@@ -80,7 +80,7 @@ def _generate_info_pic_internal(data, pinfo):
     clan_name_text = _TraditionalToSimplified(data["clan_name"])
 
     # JAG: Set clan name to game clan name
-    clan_name_text = chara.fromid(id_favorite).clan()
+    clan_name_text = chara.fromid(id_favorite).clan
     user_comment_arr = _cut_str(_TraditionalToSimplified(
         data["user_info"]["user_comment"]), 25)
 
