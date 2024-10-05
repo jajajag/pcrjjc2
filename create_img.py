@@ -4,17 +4,7 @@ import time
 from pathlib import Path
 import zhconv
 from hoshino.aiorequests import run_sync_func
-# JAG: Import character names from hoshino
-try:
-    from hoshino.modules.priconne._pcr_data import CHARA_NAME, CHARA_PROFILE
-except:
-    # If not exist, use an empty dict instead
-    CHARA_NAME, CHARA_PROFILE = {}, {}
-# Find correct clan name using a new dict
-REAL_CHARA_NAME = {CHARA_NAME[i][0]: i  for i in CHARA_NAME}
-REAL_CHARA_NAME = {REAL_CHARA_NAME[i]: REAL_CHARA_NAME[i[:i.find('(')]] \
-        if i[:i.find('(')] in REAL_CHARA_NAME \
-        else REAL_CHARA_NAME[i] for i in REAL_CHARA_NAME}
+
 
 path = Path(__file__).parent # 获取文件所在目录的绝对路径
 font_cn_path = str(path / 'fonts' / 'SourceHanSansCN-Medium.otf')
@@ -78,8 +68,7 @@ def _generate_info_pic_internal(data, pinfo):
     user_name_text = _TraditionalToSimplified(data["user_info"]["user_name"])
 
     # JAG: Change nick name to character name
-    user_name_text = CHARA_NAME[id_favorite][0] \
-            if id_favorite in CHARA_NAME else '未知角色'
+    user_name_text = chara.fromid(id_favorite).name()
     team_level_text = _TraditionalToSimplified(data["user_info"]["team_level"])
     total_power_text = _TraditionalToSimplified(
         data["user_info"]["total_power"])
@@ -91,12 +80,7 @@ def _generate_info_pic_internal(data, pinfo):
     clan_name_text = _TraditionalToSimplified(data["clan_name"])
 
     # JAG: Set clan name to game clan name
-    if id_favorite in REAL_CHARA_NAME \
-            and REAL_CHARA_NAME[id_favorite] in CHARA_PROFILE \
-            and '公会' in CHARA_PROFILE[REAL_CHARA_NAME[id_favorite]]:
-        clan_name_text = CHARA_PROFILE[REAL_CHARA_NAME[id_favorite]]['公会']
-    else:
-        clan_name_text = '？？？'
+    clan_name_text = chara.fromid(id_favorite).clan()
     user_comment_arr = _cut_str(_TraditionalToSimplified(
         data["user_info"]["user_comment"]), 25)
 
