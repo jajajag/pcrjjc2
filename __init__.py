@@ -178,9 +178,8 @@ async def on_query_clan(bot, ev):
     page = robj.group(1)
 
     async with lck:
-        try:
-            res = await query_clan(page)
-            print(res)
+        res = await query_clan(page)
+        print(res)
 
 @sv.on_rex(r'^竞技场查询 ?([2-4]\d{9})?$')
 #@sv.on_rex(r'^竞技场查询 ?(\d{9})?$')
