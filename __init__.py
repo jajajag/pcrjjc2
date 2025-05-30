@@ -187,8 +187,7 @@ async def on_query_clan(bot, ev):
     async with lck:
         try:
             res = await query_clan(page)
-            period_ranking = res['period_ranking']
-            ranks = [f'{clan[rank]} {clan[clan_name]} {clan[damage]}' for clan in period_ranking]
+            ranks = [f'{clan['rank']} {clan['clan_name']} {clan['damage']}' for clan in res['period_ranking']]
             await bot.finish(ev, '\n'.join(ranks), at_sender=True)
         except ApiException as e:
             await bot.finish(ev, f'查询出错，{e}', at_sender=True)
