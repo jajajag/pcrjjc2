@@ -125,7 +125,7 @@ async def query_clan(page: int):
                 'page': int(page),
                 'is_my_clan': 0,
                 'is_first': 1,
-                'tw_server_id': 2,
+                #'tw_server_id': 2,
             }))
         return res
 
@@ -185,8 +185,13 @@ async def on_query_clan(bot, ev):
     page = robj.group(1)
 
     async with lck:
-        res = await query_clan(page)
-        print(res)
+        try:
+            res = await query_clan(page)
+            period_ranking = res['period_ranking']
+            ranks = [f'{clan[rank]} {clan[clan_name]} {clan[damage]}' for clan in period_ranking]
+            await bot.finish(ev, '\n'.join(ranks), at_sender=True)
+        except ApiException as e:
+            await bot.finish(ev, f'查询出错，{e}', at_sender=True)
 
 @sv.on_rex(r'^竞技场查询 ?([2-4]\d{9})?$')
 #@sv.on_rex(r'^竞技场查询 ?(\d{9})?$')
