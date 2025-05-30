@@ -118,7 +118,12 @@ async def query_clan(page: int):
         while client.shouldLogin:
             await client.login()
         res = (await client.callapi('/clan_battle/period_ranking', {
-                'page': int(page)
+                'period': -1, 
+                'month': 0, 
+                'page': int(page),
+                'is_my_clan': 0,
+                'is_first': 1,
+                'tw_server_id': 2,
             }))
         return res
 
