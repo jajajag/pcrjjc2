@@ -112,6 +112,16 @@ async def query(id: str):
             }))
         return res
 
+async def query_clan(page: int):
+    client, acinfo = get_client()
+    async with qlck:
+        while client.shouldLogin:
+            await client.login()
+        res = (await client.callapi('/clan_battle/period_ranking', {
+                'page': int(page)
+            }))
+        return res
+
 def save_binds():
     with open(config, 'w') as fp:
         dump(root, fp, indent=4)
@@ -159,6 +169,18 @@ async def on_arena_bind(bot, ev):
         save_binds()
 
     await bot.finish(ev, '竞技场绑定成功', at_sender=True)
+
+@sv.on_rex(r'^公会查询 ?(\d{1})?$')
+async def on_query_clan(bot, ev):
+    global binds, lck
+
+    robj = ev['match']
+    page = robj.group(1)
+
+    async with lck:
+        try:
+            res = await query_clan(page)
+            print(res)
 
 @sv.on_rex(r'^竞技场查询 ?([2-4]\d{9})?$')
 #@sv.on_rex(r'^竞技场查询 ?(\d{9})?$')
