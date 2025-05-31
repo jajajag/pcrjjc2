@@ -118,6 +118,7 @@ async def query_clan(page: int):
         while client.shouldLogin:
             await client.login()
         res = (await client.callapi('/clan_battle/period_ranking', {
+            # JAG: TODO 把clan_id放到配置文件中
                 'clan_id': 406242,
                 'clan_battle_id': -1,
                 'period': -1, 
@@ -177,6 +178,7 @@ async def on_arena_bind(bot, ev):
 
     await bot.finish(ev, '竞技场绑定成功', at_sender=True)
 
+# JAG: TODO 细化查询功能
 @sv.on_rex(r'^公会查询 ?(\d{1})?$')
 async def on_query_clan(bot, ev):
     global binds, lck
