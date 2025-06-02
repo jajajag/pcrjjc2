@@ -184,7 +184,7 @@ async def on_query_clan_name(bot, ev):
                       'clan_battle_mode': 0}
             res = await query(api, params)
             if not res['list']:
-                await bot.finish(ev, '查询出错，未找到含有该名称的公会', 
+                await bot.finish(ev, '未找到含有该名称的公会', 
                                  at_sender=True)
             # JAG: 如果存在多个含有该名称的公会，按照会长名过滤
             elif len(res['list']) > 1:
@@ -192,11 +192,11 @@ async def on_query_clan_name(bot, ev):
                         for clan in res['list']]
                 show_clans_message = ''.join(show_clans)
                 if leader_name is None:
-                    await bot.finish(ev, '查询出错，找到多个含有该名称的公会，请提供会长名：' + show_clans_message, at_sender=True)
+                    await bot.finish(ev, '找到多个含有该名称的公会，请提供会长名：' + show_clans_message, at_sender=True)
                 clans = [clan for clan in res['list'] if leader_name \
                          in clan['leader_name']]
                 if len(clans) != 1:
-                    await bot.finish(ev, '查询出错，未找到或找到多个符合条件的公会，请检查会长名：：' + show_clans_message, at_sender=True)
+                    await bot.finish(ev, '未找到或找到多个符合条件的公会，请检查会长名：' + show_clans_message, at_sender=True)
             # JAG: Query clan by clan_id
             clan_id = res['list'][0]['clan_id']
             api = '/clan/others_info'
@@ -204,14 +204,20 @@ async def on_query_clan_name(bot, ev):
             res = await query(api, params)
             rank = res['clan']['detail']['current_period_ranking']
             if not rank:
-                await bot.finish(ev, '查询出错，未获得公会排名信息', 
-                                 at_sender=True)
+                await bot.finish(ev, 
+                    '未获得公会排名信息，可能在结算中或未参加会战', 
+                    at_sender=True)
             # JAG: Query clan by page
             api = '/clan_battle/period_ranking'
             params = {'clan_id': int(clan_id_cache), 'clan_battle_id': -1,
                       'period': -1, 'month': 0, 'page': int(rank) // 10,
                       'is_my_clan': 0, 'is_first': 1}
             res = await query(api, params)
+            if not res['period_ranking'] \
+                    or len(res['period_ranking']) < (rank - 1) % 10 + 1:
+                await bot.finish(ev, 
+                    '未获得公会排名信息，可能在结算中或未参加会战', 
+                    at_sender=True)
             clan = res['period_ranking'][(rank - 1) % 10]
             await bot.finish(ev, f'\n{clan["rank"]} {clan["clan_name"]} {clan["leader_name"]} {clan["damage"]}', at_sender=True)
         except ApiException as e:
