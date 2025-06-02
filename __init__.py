@@ -215,8 +215,7 @@ async def on_query_clan_name(bot, ev):
             clan = res['period_ranking'][(rank - 1) % 10]
             await bot.finish(ev, f'\n{clan["rank"]} {clan["clan_name"]} {clan["leader_name"]} {clan["damage"]}', at_sender=True)
         except ApiException as e:
-            await bot.finish(ev, f'查询出错，公会页数非法或在结算中', 
-                             at_sender=True)
+            await bot.finish(ev, f'查询出错，{e}', at_sender=True)
 
 @sv.on_rex(r'^排名查询\s*(\d+)?$')
 async def on_query_clan_page(bot, ev):
@@ -242,10 +241,13 @@ async def on_query_clan_page(bot, ev):
                       'is_my_clan': 0, 'is_first': 1}
             res = await query(api, params)
             ranks = [f'\n{clan["rank"]} {clan["clan_name"]} {clan["leader_name"]} {clan["damage"]}' for clan in res['period_ranking']]
+            if not ranks:
+                await bot.finish(ev, 
+                    '未获得公会排名信息，公会页数非法或在结算中',
+                    at_sender=True)
             await bot.finish(ev, ''.join(ranks), at_sender=True)
         except ApiException as e:
-            await bot.finish(ev, f'查询出错，公会页数非法或在结算中', 
-                             at_sender=True)
+            await bot.finish(ev, f'查询出错，{e}', at_sender=True)
 
 @sv.on_rex(r'^竞技场查询\s*([2-4]\d{9})?$')
 async def on_query_arena(bot, ev):
