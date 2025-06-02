@@ -87,6 +87,8 @@ qlck = Lock()
 # Forked from https://github.com/azmiao/pcrjjc_tw_new/commit/42346b79d9da112ad8fd84070e19729126c79899
 # 全局缓存的client登陆 | 减少协议握手次数
 client_cache = None
+# JAG: Clan ID cache for clan battle queries
+clan_id_cache = None
 
 # 获取配置文件
 def get_client():
@@ -102,32 +104,13 @@ def get_client():
         client_cache = client
     return client_cache, acinfo
 
-async def query(id: str):
+# JAG: 把api的调用放到外面
+async def query(api: str, params: dict):
     client, acinfo = get_client()
     async with qlck:
         while client.shouldLogin:
             await client.login()
-        res = (await client.callapi('/profile/get_profile', {
-                'target_viewer_id': int(id)
-            }))
-        return res
-
-async def query_clan(page: int):
-    client, acinfo = get_client()
-    async with qlck:
-        while client.shouldLogin:
-            await client.login()
-        res = (await client.callapi('/clan_battle/period_ranking', {
-            # JAG: TODO 把clan_id放到配置文件中
-                'clan_id': 406242,
-                'clan_battle_id': -1,
-                'period': -1, 
-                'month': 0, 
-                'page': int(page),
-                'is_my_clan': 0,
-                'is_first': 1,
-                #'tw_server_id': 2,
-            }))
+        res = (await client.callapi(api, params))
         return res
 
 def save_binds():
@@ -156,7 +139,6 @@ async def pcrjjc_del(bot, ev):
             await bot.send(ev, f'已清空全部【{num}】个已订阅账号！')
 
 @sv.on_rex(r'^竞技场绑定 ?([2-4]\d{9})$')
-#@sv.on_rex(r'^竞技场绑定 ?(\d{9})$')
 async def on_arena_bind(bot, ev):
     global binds, lck
 
@@ -178,24 +160,94 @@ async def on_arena_bind(bot, ev):
 
     await bot.finish(ev, '竞技场绑定成功', at_sender=True)
 
-# JAG: TODO 细化查询功能
-@sv.on_rex(r'^公会查询 ?(\d{1})?$')
-async def on_query_clan(bot, ev):
-    global binds, lck
+@sv.on_rex(r'^公会查询\s*(\S+)?\s*(\S+)?$')
+async def on_query_clan_name(bot, ev):
+    global lck, clan_id_cache
+
+    robj = ev['match']
+    clan_name, leader_name = robj.group(1), robj.group(2)
+
+    async with lck:
+        if clan_name is None:
+            await bot.finish(ev, '请输入您想查询的公会名', at_sender=True)
+        try:
+            # JAG: Fetch clan_id if not cached
+            if clan_id_cache is None:
+                api = '/clan/info'
+                params = {'clan_id': 0, 'get_user_equip': 1}
+                res = await query(api, params)
+                clan_id_cache = res['clan']['detail']['clan_id']
+            # JAG: Search clan by name
+            api = '/clan/search_clan'
+            params = {'clan_name': clan_name, 'join_condition': 1,
+                      'member_condition_range': 0, 'activity': 0,
+                      'clan_battle_mode': 0}
+            res = await query(api, params)
+            if not res['list']:
+                await bot.finish(ev, '查询出错，未找到含有该名称的公会', 
+                                 at_sender=True)
+            # JAG: 如果存在多个含有该名称的公会，按照会长名过滤
+            elif len(res['list']) > 1:
+                show_clans = [f"\n{clan['clan_name']} {clan['leader_name']}" \
+                        for clan in res['list']]
+                show_clans_message = ''.join(show_clans)
+                if leader_name is None:
+                    await bot.finish(ev, '查询出错，找到多个含有该名称的公会，请提供会长名：' + show_clans_message, at_sender=True)
+                clans = [clan for clan in res['list'] if leader_name \
+                         in clan['leader_name']]
+                if len(clans) != 1:
+                    await bot.finish(ev, '查询出错，未找到或找到多个符合条件的公会，请检查会长名：：' + show_clans_message, at_sender=True)
+            # JAG: Query clan by clan_id
+            clan_id = res['list'][0]['clan_id']
+            api = '/clan/others_info'
+            params = {'clan_id': res['list'][0]['clan_id']}
+            res = await query(api, params)
+            rank = res['clan']['detail']['current_period_ranking']
+            if not rank:
+                await bot.finish(ev, '查询出错，未获得公会排名信息', 
+                                 at_sender=True)
+            # JAG: Query clan by page
+            api = '/clan_battle/period_ranking'
+            params = {'clan_id': int(clan_id_cache), 'clan_battle_id': -1,
+                      'period': -1, 'month': 0, 'page': int(rank) // 10,
+                      'is_my_clan': 0, 'is_first': 1}
+            res = await query(api, params)
+            clan = res['period_ranking'][(rank - 1) % 10]
+            await bot.finish(ev, f'\n{clan["rank"]} {clan["clan_name"]} {clan["leader_name"]} {clan["damage"]}', at_sender=True)
+        except ApiException as e:
+            await bot.finish(ev, f'查询出错，公会页数非法或在结算中', 
+                             at_sender=True)
+
+@sv.on_rex(r'^排名查询\s*(\d+)?$')
+async def on_query_clan_page(bot, ev):
+    global lck, clan_id_cache
 
     robj = ev['match']
     page = robj.group(1)
 
     async with lck:
+        if page is None:
+            await bot.finish(ev, '请输入您想查询的公会页数', at_sender=True)
         try:
-            res = await query_clan(page)
-            ranks = [f'{clan['rank']} {clan['clan_name']} {clan['damage']}' for clan in res['period_ranking']]
-            await bot.finish(ev, '\n'.join(ranks), at_sender=True)
+            # JAG: Fetch clan_id if not cached
+            if clan_id_cache is None:
+                api = '/clan/info'
+                params = {'clan_id': 0, 'get_user_equip': 1}
+                res = await query(api, params)
+                clan_id_cache = res['clan']['detail']['clan_id']
+            # JAG: Query clan by page
+            api = '/clan_battle/period_ranking'
+            params = {'clan_id': int(clan_id_cache), 'clan_battle_id': -1,
+                      'period': -1, 'month': 0, 'page': int(page) - 1,
+                      'is_my_clan': 0, 'is_first': 1}
+            res = await query(api, params)
+            ranks = [f'\n{clan["rank"]} {clan["clan_name"]} {clan["leader_name"]} {clan["damage"]}' for clan in res['period_ranking']]
+            await bot.finish(ev, ''.join(ranks), at_sender=True)
         except ApiException as e:
-            await bot.finish(ev, f'查询出错，{e}', at_sender=True)
+            await bot.finish(ev, f'查询出错，公会页数非法或在结算中', 
+                             at_sender=True)
 
 @sv.on_rex(r'^竞技场查询 ?([2-4]\d{9})?$')
-#@sv.on_rex(r'^竞技场查询 ?(\d{9})?$')
 async def on_query_arena(bot, ev):
     global binds, lck
 
@@ -211,7 +263,10 @@ async def on_query_arena(bot, ev):
             else:
                 id = binds[uid]['id']
         try:
-            res = await query(id)
+            # JAG: Pass the params to api
+            api = '/profile/get_profile'
+            params = {'target_viewer_id': int(id)}
+            res = await query(api, params)
             
             last_login_time = int (res['user_info']['last_login_time'])
             last_login_date = time.localtime(last_login_time)
@@ -232,7 +287,6 @@ pjjc排名：{res['user_info']["grand_arena_rank"]}
             await bot.finish(ev, f'查询出错，{e}', at_sender=True)
 
 @sv.on_rex(r'^详细查询 ?([2-4]\d{9})?$')
-#@sv.on_rex(r'^详细查询 ?(\d{9})?$')
 async def on_query_arena_all(bot, ev):
     global binds, lck
 
@@ -248,7 +302,10 @@ async def on_query_arena_all(bot, ev):
             else:
                 id = binds[uid]['id']
         try:
-            res = await query(id)
+            # JAG: Pass the params to api
+            api = '/profile/get_profile'
+            params = {'target_viewer_id': int(id)}
+            res = await query(api, params)
             # 通过log显示信息
             sv.logger.info('开始生成竞技场查询图片...')
             # result_image = await generate_info_pic(res, cx)
@@ -357,7 +414,10 @@ async def on_arena_schedule():
             if (not info['arena_on']) and (not info['grand_arena_on']):
                 continue
             sv.logger.info(f'querying {info["id"]} for {info["uid"]}')
-            res = await query(info['id'])
+            # JAG: Pass the params to api
+            api = '/profile/get_profile'
+            params = {'target_viewer_id': int(info['id'])}
+            res = await query(api, params)
             res = (res['user_info']['arena_rank'],
                     res['user_info']['grand_arena_rank'])
 
