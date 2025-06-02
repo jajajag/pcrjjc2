@@ -188,7 +188,7 @@ async def on_query_clan_name(bot, ev):
                                  at_sender=True)
             # JAG: 如果存在多个含有该名称的公会，按照会长名过滤
             elif len(res['list']) > 1:
-                show_clans = [f"\n{clan['clan_name']} {clan['leader_name']}" \
+                show_clans = [f"\n{clan['clan_name']}--{clan['leader_name']}" \
                         for clan in res['list']]
                 show_clans_message = ''.join(show_clans)
                 if leader_name is None:
