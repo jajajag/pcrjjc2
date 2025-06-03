@@ -285,7 +285,7 @@ async def on_query_arena(bot, ev):
             
             await bot.finish(ev, 
 #f'''昵称：{res['user_info']["user_name"]}
-f'''昵称：{user_name_text}
+f'''头像：{user_name_text}
 jjc排名：{res['user_info']["arena_rank"]}
 pjjc排名：{res['user_info']["grand_arena_rank"]}
 最后登录：{last_login_str}
