@@ -132,8 +132,10 @@ def _generate_info_pic_internal(data, pinfo):
     talent_list = ["火", "水", "风", "光", "暗"]
     talent_quest = data["quest_info"]["talent_quest"]
     talent_quest_sorted = sorted(talent_quest, key=lambda x: x['talent_id'])
-    clear_count_list = [talent_list[i] \
-            + str(talent_quest_sorted[i]['clear_count']) for i in range(5)]
+    clear_count = [x['clear_count'] for x in talent_quest_sorted]
+    clear_count_res = ['X' if x % 10 == 0 else str(x) for x in clear_count]
+    clear_count_list = [talent_list[i] + str((clear_count[i] + 9) // 10) \
+            + clear_count_res[i] for i in range(5)]
     talent_quest_text = _TraditionalToSimplified(
             '/'.join(map(str, clear_count_list)))
 
