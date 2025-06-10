@@ -490,7 +490,7 @@ async def update_ver():
         json.dump(default_headers, f, indent=4, ensure_ascii=False)
     # Clear the cache
     global client_cache
-    client_cache = None 
+    client_cache = None
     sv.logger.info(f'pcr-jjc2-tw的游戏版本已更新至最新') 
 
 @sv.on_rex('(启用|停止)公会订阅')
