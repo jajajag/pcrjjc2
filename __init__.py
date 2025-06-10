@@ -5,8 +5,8 @@ from .safeservice import SafeService
 from asyncio import Lock, sleep
 from copy import deepcopy
 from datetime import datetime
-from hoshino import logger, priv
-from hoshino.typing import CommandSession, MessageSegment, NoticeSession
+from hoshino import logger, priv, get_bot
+from hoshino.typing import MessageSegment, NoticeSession
 from hoshino.util import pic2b64
 from json import load, dump
 from nonebot import get_bot
@@ -490,11 +490,11 @@ async def update_ver():
     client_cache = None
     sv.logger.info(f'pcr-jjc2-tw的游戏版本已更新至最新') 
 
-async def broadcast_rankings(sess: CommandSession = None):
+async def broadcast_rankings():
     group_list = [749580906]
     # JAG: 0. Initialize parameters (we assume at least one sid is available)
     global clan_id_cache
-    bot = sess.bot
+    bot = get_bot()
     sid = random.choice(bot.get_self_ids())
     # JAG: 1. Check if today is within the last four days of the month
     now = datetime.now()
@@ -531,7 +531,5 @@ async def broadcast_rankings(sess: CommandSession = None):
         except CQHttpError as e:
             logger.info(f'发送排名信息到群{group_id}失败: {e}')
 
-sucmd('top-clans-query', force_private=False, 
-      aliases=('前排查询'))(broadcast_rankings)
 sv.scheduled_job('cron', hour='4', minute='55')(broadcast_rankings)
 sv.scheduled_job('cron', hour='23', minute='55')(broadcast_rankings)
