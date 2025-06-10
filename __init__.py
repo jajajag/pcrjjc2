@@ -4,7 +4,7 @@ from .playerpref import decryptxml
 from .safeservice import SafeService
 from asyncio import Lock, sleep
 from copy import deepcopy
-from datetime import datatime
+from datetime import datetime
 from hoshino import logger, priv
 from hoshino.typing import CommandSession, MessageSegment, NoticeSession
 from hoshino.util import pic2b64
@@ -531,5 +531,7 @@ async def broadcast_rankings(sess: CommandSession = None):
         except CQHttpError as e:
             logger.info(f'发送排名信息到群{group_id}失败: {e}')
 
-@sv.scheduled_job('cron', hour='4', minute='55')(broadcast_rankings)
-@sv.scheduled_job('cron', hour='23', minute='55')(broadcast_rankings)
+sucmd('top-clans-query', force_private=False, 
+      aliases=('前排查询'))(broadcast_rankings)
+sv.scheduled_job('cron', hour='4', minute='55')(broadcast_rankings)
+sv.scheduled_job('cron', hour='23', minute='55')(broadcast_rankings)
