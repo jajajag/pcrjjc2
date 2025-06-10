@@ -187,12 +187,12 @@ async def on_query_clan_name(bot, ev):
                   'member_condition_range': 0, 'activity': 0,
                   'clan_battle_mode': 0}
         res = await query(api, params)
-        if not res['list']:
+        clans = [clan for clan in res['list']]
+        if not clans:
             await bot.finish(ev, '未找到含有该名称的公会', 
                              at_sender=True)
-        clans = [clan for clan in res['list']]
         # JAG: 如果存在多个含有该名称的公会，按照会长名过滤
-        elif len(res['list']) > 1:
+        elif len(clans) > 1:
             show_clans = [f"\n{clan['clan_name']} -> {clan['leader_name']}" for clan in res['list']]
             show_clans_message = ''.join(show_clans)
             if leader_name is None:
