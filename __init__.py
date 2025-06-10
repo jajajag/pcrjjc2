@@ -67,7 +67,8 @@ async def group_num(bot, ev):
 curpath = dirname(__file__)
 config = join(curpath, 'binds.json')
 root = {
-    'arena_bind' : {}
+    'arena_bind' : {},
+    'clan_bind' : []
 }
 if exists(config):
     with open(config) as fp:
@@ -489,6 +490,22 @@ async def update_ver():
     global client_cache
     client_cache = None
     sv.logger.info(f'pcr-jjc2-tw的游戏版本已更新至最新') 
+
+@sv.on_rex('(启用|停止)公会订阅')
+async def change_clan_sub(bot, ev):
+    global root, lck
+
+    if not priv.check_priv(ev, priv.ADMIN):
+        await bot.finish(ev, '抱歉，您的权限不足，只有管理员才能进行该操作！')
+
+    async with lck:
+        group_id = str(ev['group_id'])
+        if ev['match'].group(1) == '启用' and group_id not in root['clan_bind']:
+            root['clan_bind'].append(group_id)
+        else:
+            root['clan_bind'] = [x for x in root['clan_bind'] if x != group_id]
+        save_binds()
+        await bot.finish(ev, f'{ev["match"].group(0)}成功', at_sender=True)
 
 async def broadcast_rankings():
     group_list = [749580906]
