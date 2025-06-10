@@ -32,6 +32,7 @@ sv_help = '''
 [详细查询 (uid)] 查询账号详细信息
 [公会查询 公会名 会长名] 查询指定公会排名和分数
 [排名查询 页数] 根据排名查询公会排名和分数
+[(启用|停止)公会订阅] (启用|停止)公会日界排名推送
 [(启用|停止)竞技场订阅] (启用|停止)战斗竞技场排名变动推送
 [(启用|停止)公主竞技场订阅] (启用|停止)公主竞技场排名变动推送
 [竞技场订阅状态] 查看排名变动推送绑定状态
@@ -186,10 +187,10 @@ async def on_query_clan_name(bot, ev):
                   'member_condition_range': 0, 'activity': 0,
                   'clan_battle_mode': 0}
         res = await query(api, params)
-        clans = [clan for clan in res['list']]
         if not res['list']:
             await bot.finish(ev, '未找到含有该名称的公会', 
                              at_sender=True)
+        clans = [clan for clan in res['list']]
         # JAG: 如果存在多个含有该名称的公会，按照会长名过滤
         elif len(res['list']) > 1:
             show_clans = [f"\n{clan['clan_name']} -> {clan['leader_name']}" for clan in res['list']]
