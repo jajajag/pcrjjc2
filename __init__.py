@@ -207,7 +207,7 @@ async def on_query_clan_name(bot, ev):
         # JAG: Query clan by clan_id
         clan_id = clans[0]['clan_id']
         api = '/clan/others_info'
-        params = {'clan_id': res['list'][0]['clan_id']}
+        params = {'clan_id': clan_id}
         res = await query(api, params)
         rank = res['clan']['detail']['current_period_ranking']
         if not rank:
