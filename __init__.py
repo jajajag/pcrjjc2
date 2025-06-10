@@ -186,6 +186,7 @@ async def on_query_clan_name(bot, ev):
                   'member_condition_range': 0, 'activity': 0,
                   'clan_battle_mode': 0}
         res = await query(api, params)
+        clans = [clan for clan in res['list']]
         if not res['list']:
             await bot.finish(ev, '未找到含有该名称的公会', 
                              at_sender=True)
@@ -200,11 +201,11 @@ async def on_query_clan_name(bot, ev):
             clans = [clan for clan in res['list'] if leader_name \
                      in clan['leader_name']]
             if len(clans) != 1:
-                await bot.finish(ev, 
+                await bot.finish(ev,
                         '未找到或找到多个符合条件的公会，请检查会长名：' \
                         + show_clans_message, at_sender=True)
         # JAG: Query clan by clan_id
-        clan_id = res['list'][0]['clan_id']
+        clan_id = clans[0]['clan_id']
         api = '/clan/others_info'
         params = {'clan_id': res['list'][0]['clan_id']}
         res = await query(api, params)
