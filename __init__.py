@@ -507,10 +507,12 @@ async def change_clan_sub(bot, ev):
         save_binds()
         await bot.finish(ev, f'{ev["match"].group(0)}成功', at_sender=True)
 
+# JAG: Broadcast ranking information to subscribed groups
 async def broadcast_rankings():
-    group_list = [749580906]
     # JAG: 0. Initialize parameters (we assume at least one sid is available)
-    global clan_id_cache
+    global clan_id_cache, lck, root
+    async with lck:
+        group_list = deepcopy(root['clan_bind'])
     bot = get_bot()
     sid = random.choice(bot.get_self_ids())
     # JAG: 1. Check if today is within the last four days of the month
