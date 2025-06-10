@@ -1,20 +1,23 @@
+from .create_img import generate_info_pic, generate_support_pic
+from .pcrclient import pcrclient, ApiException, get_headers
+from .playerpref import decryptxml
+from .safeservice import SafeService
+from asyncio import Lock, sleep
+from copy import deepcopy
+from datetime import datatime
+from hoshino import logger, priv
+from hoshino.typing import CommandSession, MessageSegment, NoticeSession
+from hoshino.util import pic2b64
 from json import load, dump
 from nonebot import get_bot
-from hoshino import priv
-from hoshino.typing import NoticeSession, MessageSegment
-from .pcrclient import pcrclient, ApiException, get_headers
-from asyncio import Lock
 from os.path import dirname, join, exists
-from copy import deepcopy
 from traceback import format_exc
-from .safeservice import SafeService
-from .playerpref import decryptxml
-from .create_img import generate_info_pic, generate_support_pic
-from hoshino.util import pic2b64
-import time
-import requests
-import os
+import calendar
 import json
+import os
+import random
+import requests
+import time
 # JAG: Import character names from hoshino
 try:
     from hoshino.modules.priconne._pcr_data import CHARA_NAME
@@ -167,60 +170,65 @@ async def on_query_clan_name(bot, ev):
     robj = ev['match']
     clan_name, leader_name = robj.group(1), robj.group(2)
 
-    async with lck:
-        if clan_name is None:
-            await bot.finish(ev, '请输入您想查询的公会名', at_sender=True)
-        try:
-            # JAG: Fetch clan_id if not cached
-            if clan_id_cache is None:
-                api = '/clan/info'
-                params = {'clan_id': 0, 'get_user_equip': 1}
-                res = await query(api, params)
-                clan_id_cache = res['clan']['detail']['clan_id']
-            # JAG: Search clan by name
-            api = '/clan/search_clan'
-            params = {'clan_name': clan_name, 'join_condition': 1,
-                      'member_condition_range': 0, 'activity': 0,
-                      'clan_battle_mode': 0}
+    if clan_name is None:
+        await bot.finish(ev, '请输入您想查询的公会名', at_sender=True)
+    try:
+        # JAG: Fetch clan_id if not cached
+        if clan_id_cache is None:
+            api = '/clan/info'
+            params = {'clan_id': 0, 'get_user_equip': 1}
             res = await query(api, params)
-            if not res['list']:
-                await bot.finish(ev, '未找到含有该名称的公会', 
-                                 at_sender=True)
-            # JAG: 如果存在多个含有该名称的公会，按照会长名过滤
-            elif len(res['list']) > 1:
-                show_clans = [f"\n{clan['clan_name']} -> {clan['leader_name']}" for clan in res['list']]
-                show_clans_message = ''.join(show_clans)
-                if leader_name is None:
-                    await bot.finish(ev, '找到多个含有该名称的公会，请提供会长名：' + show_clans_message, at_sender=True)
-                clans = [clan for clan in res['list'] if leader_name \
-                         in clan['leader_name']]
-                if len(clans) != 1:
-                    await bot.finish(ev, '未找到或找到多个符合条件的公会，请检查会长名：' + show_clans_message, at_sender=True)
-            # JAG: Query clan by clan_id
-            clan_id = res['list'][0]['clan_id']
-            api = '/clan/others_info'
-            params = {'clan_id': res['list'][0]['clan_id']}
-            res = await query(api, params)
-            rank = res['clan']['detail']['current_period_ranking']
-            if not rank:
+            clan_id_cache = res['clan']['detail']['clan_id']
+        # JAG: Search clan by name
+        api = '/clan/search_clan'
+        params = {'clan_name': clan_name, 'join_condition': 1,
+                  'member_condition_range': 0, 'activity': 0,
+                  'clan_battle_mode': 0}
+        res = await query(api, params)
+        if not res['list']:
+            await bot.finish(ev, '未找到含有该名称的公会', 
+                             at_sender=True)
+        # JAG: 如果存在多个含有该名称的公会，按照会长名过滤
+        elif len(res['list']) > 1:
+            show_clans = [f"\n{clan['clan_name']} -> {clan['leader_name']}" for clan in res['list']]
+            show_clans_message = ''.join(show_clans)
+            if leader_name is None:
+                await bot.finish(ev,
+                        '找到多个含有该名称的公会，请提供会长名：' \
+                        + show_clans_message, at_sender=True)
+            clans = [clan for clan in res['list'] if leader_name \
+                     in clan['leader_name']]
+            if len(clans) != 1:
                 await bot.finish(ev, 
-                    '未获得公会排名信息，可能在结算中或未参加会战', 
-                    at_sender=True)
-            # JAG: Query clan by page
-            api = '/clan_battle/period_ranking'
-            params = {'clan_id': int(clan_id_cache), 'clan_battle_id': -1,
-                      'period': -1, 'month': 0, 'page': int(rank) // 10,
-                      'is_my_clan': 0, 'is_first': 1}
-            res = await query(api, params)
-            if not res['period_ranking'] \
-                    or len(res['period_ranking']) < (rank - 1) % 10 + 1:
-                await bot.finish(ev, 
-                    '未获得公会排名信息，可能在结算中或未参加会战', 
-                    at_sender=True)
-            clan = res['period_ranking'][(rank - 1) % 10]
-            await bot.finish(ev, f'\n{clan["rank"]} {clan["clan_name"]} {clan["leader_name"]} {clan["damage"]}', at_sender=True)
-        except ApiException as e:
-            await bot.finish(ev, f'查询出错，{e}', at_sender=True)
+                        '未找到或找到多个符合条件的公会，请检查会长名：' \
+                        + show_clans_message, at_sender=True)
+        # JAG: Query clan by clan_id
+        clan_id = res['list'][0]['clan_id']
+        api = '/clan/others_info'
+        params = {'clan_id': res['list'][0]['clan_id']}
+        res = await query(api, params)
+        rank = res['clan']['detail']['current_period_ranking']
+        if not rank:
+            await bot.finish(ev, 
+                '未获得公会排名信息，可能在结算中或未参加会战', 
+                at_sender=True)
+        # JAG: Query clan by page
+        api = '/clan_battle/period_ranking'
+        params = {'clan_id': int(clan_id_cache), 'clan_battle_id': -1,
+                  'period': -1, 'month': 0, 'page': int(rank) // 10,
+                  'is_my_clan': 0, 'is_first': 1}
+        res = await query(api, params)
+        if not res['period_ranking'] \
+                or len(res['period_ranking']) < (rank - 1) % 10 + 1:
+            await bot.finish(ev, 
+                '未获得公会排名信息，可能在结算中或未参加会战', 
+                at_sender=True)
+        clan = res['period_ranking'][(rank - 1) % 10]
+        await bot.finish(ev, 
+                f'\n{clan["rank"]} {clan["clan_name"]} {clan["damage"]}',
+                at_sender=True)
+    except ApiException as e:
+        await bot.finish(ev, f'查询出错，{e}', at_sender=True)
 
 @sv.on_rex(r'^排名查询\s*(\d+)?$')
 async def on_query_clan_page(bot, ev):
@@ -229,30 +237,29 @@ async def on_query_clan_page(bot, ev):
     robj = ev['match']
     page = robj.group(1)
 
-    async with lck:
-        if page is None:
-            await bot.finish(ev, '请输入您想查询的公会页数', at_sender=True)
-        try:
-            # JAG: Fetch clan_id if not cached
-            if clan_id_cache is None:
-                api = '/clan/info'
-                params = {'clan_id': 0, 'get_user_equip': 1}
-                res = await query(api, params)
-                clan_id_cache = res['clan']['detail']['clan_id']
-            # JAG: Query clan by page
-            api = '/clan_battle/period_ranking'
-            params = {'clan_id': int(clan_id_cache), 'clan_battle_id': -1,
-                      'period': -1, 'month': 0, 'page': int(page) - 1,
-                      'is_my_clan': 0, 'is_first': 1}
+    if page is None:
+        await bot.finish(ev, '请输入您想查询的公会页数', at_sender=True)
+    try:
+        # JAG: Fetch clan_id if not cached
+        if clan_id_cache is None:
+            api = '/clan/info'
+            params = {'clan_id': 0, 'get_user_equip': 1}
             res = await query(api, params)
-            ranks = [f'\n{clan["rank"]} {clan["clan_name"]} {clan["leader_name"]} {clan["damage"]}' for clan in res['period_ranking']]
-            if not ranks:
-                await bot.finish(ev, 
-                    '未获得公会排名信息，公会页数非法或在结算中',
-                    at_sender=True)
-            await bot.finish(ev, ''.join(ranks), at_sender=True)
-        except ApiException as e:
-            await bot.finish(ev, f'查询出错，{e}', at_sender=True)
+            clan_id_cache = res['clan']['detail']['clan_id']
+        # JAG: Query clan by page
+        api = '/clan_battle/period_ranking'
+        params = {'clan_id': int(clan_id_cache), 'clan_battle_id': -1,
+                  'period': -1, 'month': 0, 'page': int(page) - 1,
+                  'is_my_clan': 0, 'is_first': 1}
+        res = await query(api, params)
+        ranks = [f'\n{clan["rank"]} {clan["clan_name"]} {clan["damage"]}' for clan in res['period_ranking']]
+        if not ranks:
+            await bot.finish(ev, 
+                '未获得公会排名信息，公会页数非法或在结算中',
+                at_sender=True)
+        await bot.finish(ev, ''.join(ranks), at_sender=True)
+    except ApiException as e:
+        await bot.finish(ev, f'查询出错，{e}', at_sender=True)
 
 @sv.on_rex(r'^竞技场查询\s*([2-4]\d{9})?$')
 async def on_query_arena(bot, ev):
@@ -482,3 +489,47 @@ async def update_ver():
     global client_cache
     client_cache = None
     sv.logger.info(f'pcr-jjc2-tw的游戏版本已更新至最新') 
+
+async def broadcast_rankings(sess: CommandSession = None):
+    group_list = [749580906]
+    # JAG: 0. Initialize parameters (we assume at least one sid is available)
+    global clan_id_cache
+    bot = sess.bot
+    sid = random.choice(bot.get_self_ids())
+    # JAG: 1. Check if today is within the last four days of the month
+    now = datetime.now()
+    hour, day, month, year = now.hour, now.day, now.month, now.year
+    last_day = calendar.monthrange(year, month)[1]
+    if day < last_day - 3 or (day != last_day and hour != 4):
+        return
+    # JAG: 2. Call Apis to query top 60 clans
+    try:
+        if clan_id_cache is None:
+            api = '/clan/info'
+            params = {'clan_id': 0, 'get_user_equip': 1}
+            res = await query(api, params)
+            clan_id_cache = res['clan']['detail']['clan_id']
+        ranks = []
+        for page in range(6):
+            await sleep(0.5)
+            api = '/clan_battle/period_ranking'
+            params = {'clan_id': int(clan_id_cache), 'clan_battle_id': -1,
+                      'period': -1, 'month': 0, 'page': int(page),
+                      'is_my_clan': 0, 'is_first': 1}
+            res = await query(api, params)
+            ranks += [f'{clan["rank"]} {clan["clan_name"]} {clan["damage"]}' for clan in res['period_ranking']]
+    except ApiException as e:
+        logger.info(f'查询排名信息出错: {e}')
+        return
+    message = '\n'.join(ranks)
+    # JAG: 3. Broadcast the rankings to all subscribed groups
+    for group_id in group_list:
+        await sleep(0.5)
+        try:
+            await bot.send_group_msg(self_id=sid, group_id=group_id,
+                                     message=message)
+        except CQHttpError as e:
+            logger.info(f'发送排名信息到群{group_id}失败: {e}')
+
+@sv.scheduled_job('cron', hour='4', minute='55')(broadcast_rankings)
+@sv.scheduled_job('cron', hour='23', minute='55')(broadcast_rankings)
