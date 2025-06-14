@@ -108,7 +108,7 @@ def get_client():
     return client_cache, acinfo
 
 # JAG: 缓存并返回clan_id
-def get_clan_id():
+async def get_clan_id():
     global clan_id_cache
     if clan_id_cache is None:
         res = await query(API['clan_self'])
@@ -399,7 +399,7 @@ CLAN_RANK_ERROR = '未获得公会排名信息，可能在结算中或未参加�
 async def on_query_clan_name(bot, ev):
     robj = ev['match']
     clan_name, leader_name = robj.group(1), robj.group(2)
-    self_clan_id = get_clan_id()
+    self_clan_id = await get_clan_id()
 
     if clan_name is None:
         await bot.finish(ev, '请输入您想查询的公会名', at_sender=True)
@@ -442,7 +442,7 @@ async def on_query_clan_name(bot, ev):
 async def on_query_clan_page(bot, ev):
     robj = ev['match']
     page = robj.group(1)
-    self_clan_id = get_clan_id()
+    self_clan_id = await get_clan_id()
 
     if page is None:
         await bot.finish(ev, '请输入您想查询的公会页数', at_sender=True)
@@ -480,7 +480,7 @@ async def broadcast_rankings():
         group_list = deepcopy(root['clan_bind'])
     bot = get_bot()
     sid = random.choice(bot.get_self_ids())
-    self_clan_id = get_clan_id()
+    self_clan_id = await get_clan_id()
 
     # JAG: 1. Check if today is within the last four days of the month
     now = datetime.now()
