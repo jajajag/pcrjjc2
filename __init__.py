@@ -426,7 +426,7 @@ async def on_query_clan_name(bot, ev):
         rank = res['clan']['detail']['current_period_ranking']
         if not rank: await bot.finish(ev, CLAN_RANK_ERROR, at_sender=True)
         # JAG: 4. Query clan by page
-        res = await query(API['clan_ranking'], self_clan_id, rank // 10))
+        res = await query(API['clan_ranking'], self_clan_id, rank // 10)
         if (not res['period_ranking'] 
             or len(res['period_ranking']) < (rank - 1) % 10 + 1):
             await bot.finish(ev, CLAN_RANK_ERROR, at_sender=True)
