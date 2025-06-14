@@ -31,7 +31,7 @@ def _calculate_knight_rank(value, experience_list):
     for index, exp in enumerate(experience_list):
         if value < exp:
             return round(index + 1 + value / exp, 2) 
-        value -= exp return len(experience_list)
+        value -= exp
     return len(experience_list)
 
 def _generate_info_pic_internal(data, pinfo):
