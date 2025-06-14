@@ -1,9 +1,10 @@
-from PIL import Image, ImageDraw, ImageFont, ImageColor
+from .api_config import experience_knight_rank
 from ..priconne import chara
-import time
-from pathlib import Path
-import zhconv
 from hoshino.aiorequests import run_sync_func
+from pathlib import Path
+from PIL import Image, ImageDraw, ImageFont, ImageColor
+import time
+import zhconv
 
 
 path = Path(__file__).parent # 获取文件所在目录的绝对路径
@@ -28,9 +29,10 @@ def _calculate_knight_rank(value, experience_list):
     计算公主骑士等级
     """
     for index, exp in enumerate(experience_list):
-        if value <= exp:
-            return index
-    return -1
+        if value < exp:
+            return round(index + 1 + value / exp, 2) 
+        value -= exp return len(experience_list)
+    return len(experience_list)
 
 def _generate_info_pic_internal(data, pinfo):
     '''
@@ -75,7 +77,7 @@ def _generate_info_pic_internal(data, pinfo):
     # JAG: Add princess_knight_rank
     princess_knight_exp = data["user_info"]["princess_knight_rank_total_exp"]
     princess_knight_rank = _calculate_knight_rank(
-            princess_knight_exp, pinfo['experience_knight_rank'])
+            princess_knight_exp, experience_knight_rank)
     princess_knight_rank_text = _TraditionalToSimplified(princess_knight_rank)
     clan_name_text = _TraditionalToSimplified(data["clan_name"])
 
