@@ -481,18 +481,16 @@ async def broadcast_rankings():
     bot = get_bot()
     sid = random.choice(bot.get_self_ids())
     self_clan_id = await get_clan_id()
-
     # JAG: 1. Check if today is within the last four days of the month
     now = datetime.now()
     hour, day, month, year = now.hour, now.day, now.month, now.year
     last_day = calendar.monthrange(year, month)[1]
     if day < last_day - 3 or (day != last_day and hour != 4):
         return
-
     # JAG: 2. Query top 60 clans
     try:
         ranks = [
-            f'{clan["rank"]} {clan["clan_name"]} {clan["damage"]}'
+            f'\n{clan["rank"]} {clan["clan_name"]} {clan["damage"]}'
             for page in range(6)
             for clan in (await query(
                 API['clan_ranking'], self_clan_id, page))['period_ranking']
@@ -500,8 +498,7 @@ async def broadcast_rankings():
     except ApiException as e:
         logger.info(f'查询排名信息出错: {e}')
         return
-    message = '\n'.join(ranks)
-
+    message = now.strftime('%Y-%m-%d %H:%M') + '排名' + ''.join(ranks)
     # JAG: 3. Broadcast rankings to all subscribed groups
     for group_id in group_list:
         await sleep(0.5)
