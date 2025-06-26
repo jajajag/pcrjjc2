@@ -395,7 +395,7 @@ async def update_ver():
 CLAN_RANK_ERROR = '未获得公会排名信息，可能在结算中或未参加会战'
 
 # JAG: 通过公会名和会长名查询公会排名
-@sv.on_rex(r'^公会查询\s*(\S+)?\s*(\S+)?$')
+@sv.on_rex(r'^公会查询\s*(\S+)?\s*(\S+)?$', normalize_text=False)
 async def on_query_clan_name(bot, ev):
     robj = ev['match']
     clan_name, leader_name = robj.group(1), robj.group(2)
