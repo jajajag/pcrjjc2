@@ -1,5 +1,5 @@
 from .api_config import API
-from .create_img import generate_info_pic, generate_support_pic, _TraditionalToSimplified
+from .create_img import generate_info_pic, generate_support_pic
 from .pcrclient import pcrclient, ApiException, get_headers
 from .playerpref import decryptxml
 from .safeservice import SafeService
@@ -8,7 +8,7 @@ from copy import deepcopy
 from datetime import datetime
 from hoshino import logger, priv, get_bot
 from hoshino.typing import MessageSegment, NoticeSession
-from hoshino.util import pic2b64
+from hoshino.util import pic2b64, normalize_str
 from json import load, dump
 from nonebot import get_bot
 from os.path import dirname, join, exists
@@ -412,8 +412,7 @@ async def on_query_clan_name(bot, ev):
         # JAG: 2. Filter clans by leader name if provided
         elif len(clans) > 1:
             clans = [clan for clan in clans if leader_name 
-                     and leader_name in _TraditionalToSimplified(
-                         clan['leader_name'])]
+                     and leader_name in normalize_str(clan['leader_name'])]
             if len(clans) != 1:
                 show_clans = [f"\n{clan['clan_name']} -> {clan['leader_name']}"
                           for clan in res['list']]
