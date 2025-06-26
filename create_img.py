@@ -67,19 +67,21 @@ def _generate_info_pic_internal(data, pinfo):
     font_black = (77, 76, 81, 255)
 
     # 资料卡 个人信息
-    user_name_text = _TraditionalToSimplified(data["user_info"]["user_name"])
+    #user_name_text = _TraditionalToSimplified(data["user_info"]["user_name"])
+    # JAG: Use raw input in traditional chinese
+    user_name_text = data["user_info"]["user_name"]
 
     # JAG: Change nick name to character name
     #user_name_text = chara.fromid(id_favorite).name
-    team_level_text = _TraditionalToSimplified(data["user_info"]["team_level"])
-    total_power_text = _TraditionalToSimplified(
-        data["user_info"]["total_power"])
+    team_level_text = data["user_info"]["team_level"]
+    total_power_text = data["user_info"]["total_power"]
     # JAG: Add princess_knight_rank
     princess_knight_exp = data["user_info"]["princess_knight_rank_total_exp"]
     princess_knight_rank = _calculate_knight_rank(
             princess_knight_exp, experience_knight_rank)
-    princess_knight_rank_text = _TraditionalToSimplified(princess_knight_rank)
-    clan_name_text = _TraditionalToSimplified(data["clan_name"])
+    princess_knight_rank_text = princess_knight_rank
+    #clan_name_text = _TraditionalToSimplified(data["clan_name"])
+    clan_name_text = data["clan_name"]
 
     # JAG: Set clan name to game clan name
     #clan_name_text = chara.fromid(id_favorite).clan

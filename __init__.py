@@ -1,5 +1,5 @@
 from .api_config import API
-from .create_img import generate_info_pic, generate_support_pic
+from .create_img import generate_info_pic, generate_support_pic, _TraditionalToSimplified
 from .pcrclient import pcrclient, ApiException, get_headers
 from .playerpref import decryptxml
 from .safeservice import SafeService
@@ -411,8 +411,9 @@ async def on_query_clan_name(bot, ev):
             await bot.finish(ev, '未找到含有该名称的公会', at_sender=True)
         # JAG: 2. Filter clans by leader name if provided
         elif len(clans) > 1:
-            clans = [clan for clan in res['list'] if leader_name 
-                     and leader_name in clan['leader_name']]
+            clans = [clan for clan in clans if leader_name 
+                     and leader_name in _TraditionalToSimplified(
+                         clan['leader_name'])]
             if len(clans) != 1:
                 show_clans = [f"\n{clan['clan_name']} -> {clan['leader_name']}"
                           for clan in res['list']]
