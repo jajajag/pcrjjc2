@@ -73,13 +73,12 @@ def _generate_info_pic_internal(data, pinfo):
 
     # JAG: Change nick name to character name
     #user_name_text = chara.fromid(id_favorite).name
-    team_level_text = data["user_info"]["team_level"]
-    total_power_text = data["user_info"]["total_power"]
+    team_level_text = str(data["user_info"]["team_level"])
+    total_power_text = str(data["user_info"]["total_power"])
     # JAG: Add princess_knight_rank
     princess_knight_exp = data["user_info"]["princess_knight_rank_total_exp"]
-    princess_knight_rank = _calculate_knight_rank(
-            princess_knight_exp, experience_knight_rank)
-    princess_knight_rank_text = princess_knight_rank
+    princess_knight_rank_text = str(_calculate_knight_rank(
+        princess_knight_exp, experience_knight_rank))
     #clan_name_text = _TraditionalToSimplified(data["clan_name"])
     clan_name_text = data["clan_name"]
 
