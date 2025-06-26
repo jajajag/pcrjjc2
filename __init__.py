@@ -8,7 +8,7 @@ from copy import deepcopy
 from datetime import datetime
 from hoshino import logger, priv, get_bot
 from hoshino.typing import MessageSegment, NoticeSession
-from hoshino.util import pic2b64, normalize_str
+from hoshino.util import pic2b64
 from json import load, dump
 from nonebot import get_bot
 from os.path import dirname, join, exists
@@ -395,7 +395,7 @@ async def update_ver():
 CLAN_RANK_ERROR = '未获得公会排名信息，可能在结算中或未参加会战'
 
 # JAG: 通过公会名和会长名查询公会排名
-@sv.on_rex(r'^公会查询\s*(\S+)?\s*(\S+)?$', normalize_text=False)
+@sv.on_rex(r'^公会查询\s*(\S+)?\s*(\S+)?$', normalize=False)
 async def on_query_clan_name(bot, ev):
     robj = ev['match']
     clan_name, leader_name = robj.group(1), robj.group(2)
@@ -412,7 +412,7 @@ async def on_query_clan_name(bot, ev):
         # JAG: 2. Filter clans by leader name if provided
         elif len(clans) > 1:
             clans = [clan for clan in clans if leader_name 
-                     and leader_name in normalize_str(clan['leader_name'])]
+                     and leader_name in clan['leader_name']]
             if len(clans) != 1:
                 show_clans = [f"\n{clan['clan_name']} -> {clan['leader_name']}"
                           for clan in res['list']]
