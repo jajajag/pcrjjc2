@@ -449,7 +449,7 @@ async def on_query_clan_page(bot, ev):
     try:
         # JAG: Query clan by page
         res = await query(API['clan_ranking'], self_clan_id, int(page) - 1)
-        ranks = [f'\n{clan["rank"]} {clan["clan_name"]} {clan["damage"]}'
+        ranks = [f'\n{clan["rank"]} {(clan.get("clan_name") or "此战队已解散。")} {clan["damage"]}'
                  for clan in res['period_ranking']]
         if not ranks: await bot.finish(ev, CLAN_RANK_ERROR, at_sender=True)
         await bot.finish(ev, ''.join(ranks), at_sender=True)
@@ -490,7 +490,7 @@ async def broadcast_rankings():
     # JAG: 2. Query top 60 clans
     try:
         ranks = [
-            f'\n{clan["rank"]} {clan["clan_name"]} {clan["damage"]}'
+            f'\n{clan["rank"]} {(clan.get("clan_name") or "此战队已解散。")} {clan["damage"]}'
             for page in range(6)
             for clan in (await query(
                 API['clan_ranking'], self_clan_id, page))['period_ranking']
@@ -510,3 +510,4 @@ async def broadcast_rankings():
 
 sv.scheduled_job('cron', hour='4', minute='55')(broadcast_rankings)
 sv.scheduled_job('cron', hour='23', minute='55')(broadcast_rankings)
+
