@@ -7,7 +7,7 @@ from asyncio import Lock, sleep
 from copy import deepcopy
 from datetime import datetime
 from hoshino import logger, priv, get_bot
-from hoshino.typing import MessageSegment, NoticeSession
+from hoshino.typing import MessageSegment, NoticeSession, CQHttpError
 from hoshino.util import pic2b64
 from json import load, dump
 from nonebot import get_bot
@@ -510,5 +510,3 @@ async def broadcast_rankings():
 
 sv.scheduled_job('cron', hour='4', minute='55')(broadcast_rankings)
 sv.scheduled_job('cron', hour='23', minute='55')(broadcast_rankings)
-
-
