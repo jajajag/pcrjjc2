@@ -382,11 +382,14 @@ async def leave_notice(session: NoticeSession):
 @sv.scheduled_job('cron', hour='18', minute='1')
 async def update_ver():
     header_path = os.path.join(os.path.dirname(__file__), 'headers.json')
-    new_headers = get_headers()
+    new_headers, old_headers = get_headers(), {}
+    if os.path.exists(header_path):
+        with open(header_path, 'r', encoding='UTF-8') as f:
+            old_headers = json.load(f)
     # JAG: Return if the version in the header is not updated
-    if new_headers['APP-VER'] == default_headers['APP-VER']: return
+    if old_headers.get('APP-VER') == new_headers['APP-VER']: return
     with open(header_path, 'w', encoding='UTF-8') as f:
-        json.dump(default_headers, f, indent=4, ensure_ascii=False)
+        json.dump(new_headers, f, indent=4, ensure_ascii=False)
     # Clear the cache
     global client_cache
     client_cache = None
