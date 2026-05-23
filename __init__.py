@@ -30,6 +30,7 @@ sv_help = '''
 [详细查询 (uid)] 查询账号详细信息
 [公会查询 公会名 会长名] 查询指定公会排名和分数
 [排名查询 页数] 根据排名查询公会排名和分数
+[(添加|删除)竞技场小号] 额外添加竞技场小号
 [(启用|停止)公会订阅] (启用|停止)公会日界排名推送
 [(启用|停止)竞技场订阅] (启用|停止)战斗竞技场排名变动推送
 [(启用|停止)公主竞技场订阅] (启用|停止)公主竞技场排名变动推送
@@ -173,41 +174,111 @@ async def on_arena_bind(bot, ev):
 
     await bot.finish(ev, '竞技场绑定成功', at_sender=True)
 
+#JAG: 通过加小号来实现多账号查询
+@sv.on_rex(r'^添加竞技场小号\s*([2-4]\d{9})$')
+async def add_arena_smurf(bot, ev):
+    global binds, lck
+
+    qq = str(ev['user_id'])
+    alt_id = ev['match'].group(1)
+
+    async with lck:
+        if qq not in binds:
+            await bot.finish(ev, '请先绑定主竞技场账号！', at_sender=True)
+            return
+
+        binds[qq].setdefault('smurf', [])
+
+        if alt_id in binds[qq]['smurf']:
+            await bot.finish(ev, '该小号已经添加过了！', at_sender=True)
+            return
+
+        binds[qq]['smurf'].append(alt_id)
+        save_binds()
+
+    await bot.finish(ev, f'已添加竞技场小号：{alt_id}', at_sender=True)
+
+@sv.on_rex(r'^删除竞技场小号\s*([2-4]\d{9})$')
+async def del_arena_smurf(bot, ev):
+    global binds, lck
+
+    qq = str(ev['user_id'])
+    alt_id = ev['match'].group(1)
+
+    async with lck:
+        if qq not in binds or alt_id not in binds[qq].get('smurf', []):
+            await bot.finish(ev, '未找到该小号', at_sender=True)
+            return
+
+        binds[qq]['smurf'].remove(alt_id)
+        save_binds()
+
+    await bot.finish(ev, f'已删除竞技场小号：{alt_id}', at_sender=True)
+
 @sv.on_rex(r'^竞技场查询\s*([2-4]\d{9})?$')
 async def on_query_arena(bot, ev):
     global binds, lck
 
     robj = ev['match']
-    uid = robj.group(1)
+    input_uid = robj.group(1)
 
-    async with lck:
-        if uid is None:
-            uid = str(ev['user_id'])
-            if not uid in binds:
+    # 手动输入 UID，只查这个
+    if input_uid is not None:
+        ids = [input_uid]
+    else:
+        qq = str(ev['user_id'])
+
+        async with lck:
+            if qq not in binds:
                 await bot.finish(ev, '您还未绑定竞技场', at_sender=True)
                 return
-            else:
-                uid = binds[uid]['id']
+
+            info = deepcopy(binds[qq])
+
+        ids = [info['id']] + info.get('smurf', [])
+
+    msgs = []
+
+    for idx, game_id in enumerate(ids):
         try:
-            res = await query(API['arena_profile'], uid)
-            
-            last_login_time = int (res['user_info']['last_login_time'])
+            res = await query(API['arena_profile'], game_id)
+
+            last_login_time = int(res['user_info']['last_login_time'])
             last_login_date = time.localtime(last_login_time)
-            last_login_str = time.strftime('%Y-%m-%d %H:%M:%S',last_login_date)
-            # JAG: Change nick name to character name
+            last_login_str = time.strftime(
+                '%Y-%m-%d %H:%M:%S',
+                last_login_date
+            )
+
             id_favorite = int(str(res['favorite_unit']['id'])[0:4])
-            user_name_text = (CHARA_NAME[id_favorite][0]
-                              if id_favorite in CHARA_NAME else '未知角色')
-            
-            await bot.finish(ev, 
-#f'''昵称：{res['user_info']["user_name"]}
+            user_name_text = (
+                CHARA_NAME[id_favorite][0]
+                if id_favorite in CHARA_NAME else '未知角色'
+            )
+
+            # 主号保持原格式
+            if idx == 0:
+                msgs.append(
 f'''头像：{user_name_text}
 jjc排名：{res['user_info']["arena_rank"]}
 pjjc排名：{res['user_info']["grand_arena_rank"]}
 最后登录：{last_login_str}
-''', at_sender=False)
+'''
+                )
+            # 小号额外打印
+            else:
+                msgs.append(
+f'''
+小号{idx}：{game_id}
+jjc排名：{res['user_info']["arena_rank"]}
+pjjc排名：{res['user_info']["grand_arena_rank"]}
+'''
+                )
+
         except ApiException as e:
-            await bot.finish(ev, f'查询出错，{e}', at_sender=True)
+            msgs.append(f'\n{game_id} 查询出错：{e}\n')
+
+    await bot.finish(ev, ''.join(msgs), at_sender=False)
 
 @sv.on_rex(r'^详细查询\s*([2-4]\d{9})?$')
 async def on_query_arena_all(bot, ev):
@@ -314,7 +385,6 @@ f'''
 公主竞技场订阅：{'开启' if info['grand_arena_on'] else '关闭'}
 ''', at_sender=True)
 
-
 # minutes是刷新频率，可按自身服务器性能输入其他数值，可支持整数、小数
 @sv.scheduled_job('interval', minutes=3)
 async def on_arena_schedule():
@@ -327,44 +397,77 @@ async def on_arena_schedule():
         bind_cache = deepcopy(binds)
 
     for user in bind_cache:
-        info = bind_cache[user]
-        try:
-            # JAG: Skip if both subscriptions are off
-            if (not info['arena_on']) and (not info['grand_arena_on']):
-                continue
-            sv.logger.info(f'querying {info["id"]} for {info["uid"]}')
-            res = await query(API['arena_profile'], info['id'])
-            res = (res['user_info']['arena_rank'],
-                    res['user_info']['grand_arena_rank'])
+        base_info = bind_cache[user]
 
-            if user not in cache:
-                cache[user] = res
-                continue
+        # 主号 False，小号 True
+        all_infos = [(base_info, False)]
+        for alt_id in base_info.get('smurf', []):
+            alt_info = base_info.copy()
+            alt_info['id'] = alt_id
+            all_infos.append((alt_info, True))
 
-            last = cache[user]
-            cache[user] = res
+        for info, is_alt in all_infos:
+            try:
+                # JAG: Skip if both subscriptions are off
+                if (not info['arena_on']) and (not info['grand_arena_on']):
+                    continue
 
-            if res[0] > last[0] and info['arena_on']:
-                await bot.send_group_msg(
-                    group_id = int(info['gid']),
-                    message = f'[CQ:at,qq={info["uid"]}] jjc：{last[0]}->{res[0]} ▼{res[0]-last[0]}'
+                cache_key = f'{user}:{info["id"]}'
+                prefix = f'{info["id"]} ' if is_alt else ''
+
+                sv.logger.info(f'querying {info["id"]} for {info["uid"]}')
+                res = await query(API['arena_profile'], info['id'])
+                res = (
+                    res['user_info']['arena_rank'],
+                    res['user_info']['grand_arena_rank']
                 )
 
-            if res[1] > last[1] and info['grand_arena_on']:
-                await bot.send_group_msg(
-                    group_id = int(info['gid']),
-                    message = f'[CQ:at,qq={info["uid"]}] pjjc：{last[1]}->{res[1]} ▼{res[1]-last[1]}'
-                )
-        except ApiException as e:
-            sv.logger.info(f'对{info["id"]}的检查出错\n{format_exc()}')
-            if e.code == 6:
+                if cache_key not in cache:
+                    cache[cache_key] = res
+                    continue
 
-                async with lck:
-                    binds.pop(user)
-                    save_binds()
-                sv.logger.info(f'已经自动删除错误的uid={info["id"]}')
-        except:
-            sv.logger.info(f'对{info["id"]}的检查出错\n{format_exc()}')
+                last = cache[cache_key]
+                cache[cache_key] = res
+
+                if res[0] > last[0] and info['arena_on']:
+                    await bot.send_group_msg(
+                        group_id=int(info['gid']),
+                        message=(
+                            f'[CQ:at,qq={info["uid"]}] '
+                            f'{prefix}jjc：{last[0]}->{res[0]} '
+                            f'▼{res[0]-last[0]}'
+                        )
+                    )
+
+                if res[1] > last[1] and info['grand_arena_on']:
+                    await bot.send_group_msg(
+                        group_id=int(info['gid']),
+                        message=(
+                            f'[CQ:at,qq={info["uid"]}] '
+                            f'{prefix}pjjc：{last[1]}->{res[1]} '
+                            f'▼{res[1]-last[1]}'
+                        )
+                    )
+
+            except ApiException as e:
+                sv.logger.info(f'对{info["id"]}的检查出错\n{format_exc()}')
+                if e.code == 6:
+                    async with lck:
+                        # 主号错了，删除整个绑定
+                        if info['id'] == base_info['id']:
+                            binds.pop(user)
+                        # 小号错了，只删除这个小号
+                        else:
+                            binds[user]['smurf'] = [
+                                x for x in binds[user].get('smurf', [])
+                                if x != info['id']
+                            ]
+                        save_binds()
+
+                    sv.logger.info(f'已经自动删除错误的uid={info["id"]}')
+
+            except:
+                sv.logger.info(f'对{info["id"]}的检查出错\n{format_exc()}')
 
 @sv.on_notice('group_decrease.leave')
 async def leave_notice(session: NoticeSession):
