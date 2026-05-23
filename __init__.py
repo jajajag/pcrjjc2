@@ -25,12 +25,12 @@ except: CHARA_NAME = {}
 
 sv_help = '''
 【订阅默认关闭，需要发指令手动开启】
-[竞技场绑定 uid] 绑定竞技场排名变动推送，默认双场均启用，仅排名降低时推送
+[竞技场绑定 (uid)] 绑定竞技场排名变动推送，默认双场均启用，仅排名降低时推送
 [竞技场查询 (uid)] 查询竞技场简要信息
 [详细查询 (uid)] 查询账号详细信息
 [公会查询 公会名 会长名] 查询指定公会排名和分数
 [排名查询 页数] 根据排名查询公会排名和分数
-[(添加|删除)竞技场小号] 额外添加竞技场小号
+[(添加|删除)竞技场小号 (uid)] 额外绑定竞技场小号
 [(启用|停止)公会订阅] (启用|停止)公会日界排名推送
 [(启用|停止)竞技场订阅] (启用|停止)战斗竞技场排名变动推送
 [(启用|停止)公主竞技场订阅] (启用|停止)公主竞技场排名变动推送
@@ -180,7 +180,7 @@ async def add_arena_smurf(bot, ev):
     global binds, lck
 
     qq = str(ev['user_id'])
-    alt_id = ev['match'].group(1)
+    smurf_id = ev['match'].group(1)
 
     async with lck:
         if qq not in binds:
@@ -189,31 +189,31 @@ async def add_arena_smurf(bot, ev):
 
         binds[qq].setdefault('smurf', [])
 
-        if alt_id in binds[qq]['smurf']:
+        if smurf_id in binds[qq]['smurf']:
             await bot.finish(ev, '该小号已经添加过了！', at_sender=True)
             return
 
-        binds[qq]['smurf'].append(alt_id)
+        binds[qq]['smurf'].append(smurf_id)
         save_binds()
 
-    await bot.finish(ev, f'已添加竞技场小号：{alt_id}', at_sender=True)
+    await bot.finish(ev, f'已添加竞技场小号：{smurf_id}', at_sender=True)
 
 @sv.on_rex(r'^删除竞技场小号\s*([2-4]\d{9})$')
 async def del_arena_smurf(bot, ev):
     global binds, lck
 
     qq = str(ev['user_id'])
-    alt_id = ev['match'].group(1)
+    smurf_id = ev['match'].group(1)
 
     async with lck:
-        if qq not in binds or alt_id not in binds[qq].get('smurf', []):
-            await bot.finish(ev, '未找到该小号', at_sender=True)
+        if qq not in binds or smurf_id not in binds[qq].get('smurf', []):
+            await bot.finish(ev, '未找到该小号！', at_sender=True)
             return
 
-        binds[qq]['smurf'].remove(alt_id)
+        binds[qq]['smurf'].remove(smurf_id)
         save_binds()
 
-    await bot.finish(ev, f'已删除竞技场小号：{alt_id}', at_sender=True)
+    await bot.finish(ev, f'已删除竞技场小号：{smurf_id}', at_sender=True)
 
 @sv.on_rex(r'^竞技场查询\s*([2-4]\d{9})?$')
 async def on_query_arena(bot, ev):
@@ -222,7 +222,6 @@ async def on_query_arena(bot, ev):
     robj = ev['match']
     input_uid = robj.group(1)
 
-    # 手动输入 UID，只查这个
     if input_uid is not None:
         ids = [input_uid]
     else:
@@ -245,35 +244,26 @@ async def on_query_arena(bot, ev):
 
             last_login_time = int(res['user_info']['last_login_time'])
             last_login_date = time.localtime(last_login_time)
-            last_login_str = time.strftime(
-                '%Y-%m-%d %H:%M:%S',
-                last_login_date
-            )
+            last_login_str = time.strftime('%Y-%m-%d %H:%M:%S', last_login_date)
 
             id_favorite = int(str(res['favorite_unit']['id'])[0:4])
-            user_name_text = (
-                CHARA_NAME[id_favorite][0]
-                if id_favorite in CHARA_NAME else '未知角色'
-            )
+            user_name_text = (CHARA_NAME[id_favorite][0]
+                              if id_favorite in CHARA_NAME else '未知角色')
 
-            # 主号保持原格式
-            if idx == 0:
+            if idx == 0: # 主号保持原格式
                 msgs.append(
 f'''头像：{user_name_text}
 jjc排名：{res['user_info']["arena_rank"]}
 pjjc排名：{res['user_info']["grand_arena_rank"]}
 最后登录：{last_login_str}
-'''
-                )
-            # 小号额外打印
-            else:
+''')
+            else: # 小号额外打印
                 msgs.append(
 f'''
 小号{idx}：{game_id}
 jjc排名：{res['user_info']["arena_rank"]}
 pjjc排名：{res['user_info']["grand_arena_rank"]}
-'''
-                )
+''')
 
         except ApiException as e:
             msgs.append(f'\n{game_id} 查询出错：{e}\n')
@@ -401,19 +391,19 @@ async def on_arena_schedule():
 
         # 主号 False，小号 True
         all_infos = [(base_info, False)]
-        for alt_id in base_info.get('smurf', []):
-            alt_info = base_info.copy()
-            alt_info['id'] = alt_id
-            all_infos.append((alt_info, True))
+        for smurf_id in base_info.get('smurf', []):
+            smurf_info = base_info.copy()
+            smurf_info['id'] = smurf_id
+            all_infos.append((smurf_info, True))
 
-        for info, is_alt in all_infos:
+        for info, is_smurf in all_infos:
             try:
                 # JAG: Skip if both subscriptions are off
                 if (not info['arena_on']) and (not info['grand_arena_on']):
                     continue
 
                 cache_key = f'{user}:{info["id"]}'
-                prefix = f'{info["id"]} ' if is_alt else ''
+                prefix = f'{info["id"]} ' if is_smurf else ''
 
                 sv.logger.info(f'querying {info["id"]} for {info["uid"]}')
                 res = await query(API['arena_profile'], info['id'])
