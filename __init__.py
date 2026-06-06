@@ -461,10 +461,12 @@ async def on_arena_schedule():
 @sv.on_notice('group_decrease.leave')
 async def leave_notice(session: NoticeSession):
     global lck, binds
+    
     uid = str(session.ctx['user_id'])
+    gid = str(session.ctx['group_id'])
     
     async with lck:
-        if uid in binds:
+        if uid in binds and str(binds[uid].get('gid')) == gid:
             binds.pop(uid)
             save_binds()
 
