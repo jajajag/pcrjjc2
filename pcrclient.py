@@ -52,12 +52,18 @@ def get_ver_apkcombo():
     return str(app_ver)
 
 # 获取版本号（App Store）
-def get_ver():
+def get_ver_ios():
     app_url = 'https://apps.apple.com/tw/app/超異域公主連結-re-dive/id1390473317'
     app_res = requests.get(app_url, timeout=15)#, proxies=pinfo['proxy'])
     soup = BeautifulSoup(app_res.text, 'lxml')
     ver_tmp = soup.find('p', {"class": "whats-new__latest__version"})
     app_ver = ver_tmp.text.strip().split()[-1]
+    return str(app_ver)
+
+def get_ver():
+    app_url = 'https://m-apps.qoo-app.com/zh-HK/app/6756'
+    app_res = requests.get(app_url, timeout=15)#, proxies=pinfo['proxy'])
+    app_ver = re.search(r'"softwareVersion":"([^"]+)"', app_res.text).group(1)
     return str(app_ver)
 
 class ApiException(Exception):
