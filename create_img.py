@@ -194,10 +194,10 @@ def _generate_info_pic_internal(data, pinfo):
         data["user_info"]["tower_cleared_ex_quest_count"])
 
     w, h = font_resize.getsize(tower_cleared_floor_num_text+"阶")
-    draw.text((575 - w, 949), tower_cleared_floor_num_text +
+    draw.text((575 - w, 945), tower_cleared_floor_num_text +
               "阶", font_black, font_resize)
     w, h = font_resize.getsize(tower_cleared_ex_quest_count_text)
-    draw.text((575 - w, 984), tower_cleared_ex_quest_count_text,
+    draw.text((575 - w, 980), tower_cleared_ex_quest_count_text,
               font_black, font_resize)
 
     # JAG: Display viewer_id in a proper way
@@ -206,7 +206,7 @@ def _generate_info_pic_internal(data, pinfo):
     viewer_id_arr = f'{data["user_info"]["viewer_id"]:,}'.split(',')
     viewer_id_str = "  ".join(viewer_id_arr)
     w, h = font.getsize(viewer_id_str)
-    draw.text((138 + (460 - 138) / 2 - w / 2, 1030), viewer_id_str,
+    draw.text((138 + (460 - 138) / 2 - w / 2, 1038), viewer_id_str,
               (255, 255, 255, 255), font)
 
     return im
