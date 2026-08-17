@@ -206,7 +206,7 @@ def _generate_info_pic_internal(data, pinfo):
     viewer_id_arr = f'{data["user_info"]["viewer_id"]:,}'.split(',')
     viewer_id_str = "  ".join(viewer_id_arr)
     w, h = font.getsize(viewer_id_str)
-    draw.text((138 + (460 - 138) / 2 - w / 2, 1058), viewer_id_str,
+    draw.text((138 + (460 - 138) / 2 - w / 2, 1050), viewer_id_str,
               (255, 255, 255, 255), font)
 
     return im
