@@ -575,9 +575,6 @@ async def broadcast_rankings():
     global lck, root
     async with lck: 
         group_list = deepcopy(root['clan_bind'])
-    bot = get_bot()
-    sid = random.choice(bot.get_self_ids())
-    self_clan_id = await get_clan_id()
     # JAG: 1. Check if today is within the last four days of the month
     now = datetime.now()
     hour, day, month, year = now.hour, now.day, now.month, now.year
@@ -586,6 +583,7 @@ async def broadcast_rankings():
         return
     # JAG: 2. Query top 60 clans
     try:
+        self_clan_id = await get_clan_id()
         ranks = [
             f'\n{clan["rank"]} {(clan.get("clan_name") or "此戰隊已解散。")} {clan["damage"]}'
             for page in range(6)
@@ -595,8 +593,13 @@ async def broadcast_rankings():
     except ApiException as e:
         logger.info(f'查询排名信息出错: {e}')
         return
+    # JAG: 3. Generate and save the ranking message
     message = now.strftime('%Y-%m-%d %H:%M') + '排名' + ''.join(ranks)
-    # JAG: 3. Broadcast rankings to all subscribed groups
+    logger.info(f'公会排名广播内容：{message}')
+    # JAG: 4. Check available QQ bots
+    bot = get_bot()
+    sid = random.choice(bot.get_self_ids())
+    # JAG: 5. Broadcast rankings to all subscribed groups
     for group_id in group_list:
         await sleep(0.5)
         try:
