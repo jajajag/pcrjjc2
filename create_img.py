@@ -124,7 +124,7 @@ def _generate_info_pic_internal(data, pinfo):
     #for index, value in enumerate(user_comment_arr):
     #    draw.text((170, 310 + (index * 22)), value, font_black, font_resize)
     # JAG: Original position for last login time: 350, 392
-    draw.text((34, 340), last_login_time_text[0] + "\n" +
+    draw.text((34, 360), last_login_time_text[0] + "\n" +
               last_login_time_text[1], font_black, font_resize)
     draw.text((34, 412), server_name, font_black, font_resize)
 
