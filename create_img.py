@@ -79,6 +79,8 @@ def _generate_info_pic_internal(data, pinfo):
     princess_knight_exp = data["user_info"]["princess_knight_rank_total_exp"]
     princess_knight_rank_text = str(_calculate_knight_rank(
         princess_knight_exp, experience_knight_rank))
+    # JAG: Add total connect rank
+    total_connect_rank_text = str(data["user_info"]["total_connect_rank"])
     #clan_name_text = _TraditionalToSimplified(data["clan_name"])
     clan_name_text = data["clan_name"]
 
@@ -114,15 +116,17 @@ def _generate_info_pic_internal(data, pinfo):
     w, h = font_resize.getsize(princess_knight_rank_text)
     draw.text((568 - w, 250), princess_knight_rank_text, font_black, 
               font_resize)
+    w, h = font_resize.getsize(total_connect_rank_text)
+    draw.text((568 - w, 290), total_connect_rank_text, font_black, font_resize)
     w, h = font_resize.getsize(clan_name_text)
-    draw.text((568 - w, 290), clan_name_text, font_black, font_resize)
+    draw.text((568 - w, 330), clan_name_text, font_black, font_resize)
     # JAG: Do not display user comment
     #for index, value in enumerate(user_comment_arr):
     #    draw.text((170, 310 + (index * 22)), value, font_black, font_resize)
     # JAG: Original position for last login time: 350, 392
-    draw.text((34, 330), last_login_time_text[0] + "\n" +
+    draw.text((34, 340), last_login_time_text[0] + "\n" +
               last_login_time_text[1], font_black, font_resize)
-    draw.text((34, 372), server_name, font_black, font_resize)
+    draw.text((34, 412), server_name, font_black, font_resize)
 
     # 资料卡 冒险经历
     normal_quest_text = _TraditionalToSimplified(
@@ -144,15 +148,15 @@ def _generate_info_pic_internal(data, pinfo):
 
     # JAG: Original position for the text: 498, 530
     w, h = font_resize.getsize(normal_quest_text)
-    draw.text((575 - w, 466), normal_quest_text, font_black, font_resize)
+    draw.text((575 - w, 506), normal_quest_text, font_black, font_resize)
     w, h = font_resize.getsize("H" + hard_quest_text +
                            "/VH" + very_hard_quest_text)
-    draw.text((575 - w, 496), "H" + hard_quest_text +
+    draw.text((575 - w, 536), "H" + hard_quest_text +
               "/VH", font_black, font_resize)
     w, h = font_resize.getsize(very_hard_quest_text)
-    draw.text((575 - w, 496), very_hard_quest_text, font_black, font_resize)
+    draw.text((575 - w, 536), very_hard_quest_text, font_black, font_resize)
     w, h = font_resize.getsize(talent_quest_text)
-    draw.text((575 - w, 526), talent_quest_text, font_black, font_resize)
+    draw.text((575 - w, 566), talent_quest_text, font_black, font_resize)
 
     arena_group_text = _TraditionalToSimplified(
         data["user_info"]["arena_group"])
@@ -167,26 +171,26 @@ def _generate_info_pic_internal(data, pinfo):
         data["user_info"]["grand_arena_rank"])
 
     w, h = font_resize.getsize(arena_time_text)
-    draw.text((575 - w, 594), arena_time_text, font_black, font_resize)
+    draw.text((575 - w, 634), arena_time_text, font_black, font_resize)
     w, h = font_resize.getsize(arena_group_text+"场")
-    draw.text((575 - w, 626), arena_group_text+"场", font_black, font_resize)
+    draw.text((575 - w, 666), arena_group_text+"场", font_black, font_resize)
     w, h = font_resize.getsize(arena_rank_text+"名")
-    draw.text((575 - w, 658), arena_rank_text+"名", font_black, font_resize)
+    draw.text((575 - w, 698), arena_rank_text+"名", font_black, font_resize)
     w, h = font_resize.getsize(grand_arena_time_text)
-    draw.text((575 - w, 700), grand_arena_time_text, font_black, font_resize)
+    draw.text((575 - w, 740), grand_arena_time_text, font_black, font_resize)
     w, h = font_resize.getsize(grand_arena_group_text+"场")
-    draw.text((575 - w, 734), grand_arena_group_text+"场", font_black, font_resize)
+    draw.text((575 - w, 774), grand_arena_group_text+"场", font_black, font_resize)
     w, h = font_resize.getsize(grand_arena_rank_text+"名")
-    draw.text((575 - w, 768), grand_arena_rank_text+"名", font_black, font_resize)
+    draw.text((575 - w, 808), grand_arena_rank_text+"名", font_black, font_resize)
 
     unit_num_text = _TraditionalToSimplified(data["user_info"]["unit_num"])
     open_story_num_text = _TraditionalToSimplified(
         data["user_info"]["open_story_num"])
 
     w, h = font_resize.getsize(unit_num_text)
-    draw.text((575 - w, 840), unit_num_text, font_black, font_resize)
+    draw.text((575 - w, 880), unit_num_text, font_black, font_resize)
     w, h = font_resize.getsize(open_story_num_text)
-    draw.text((575 - w, 876), open_story_num_text, font_black, font_resize)
+    draw.text((575 - w, 916), open_story_num_text, font_black, font_resize)
 
     tower_cleared_floor_num_text = _TraditionalToSimplified(
         data["user_info"]["tower_cleared_floor_num"])
@@ -194,10 +198,10 @@ def _generate_info_pic_internal(data, pinfo):
         data["user_info"]["tower_cleared_ex_quest_count"])
 
     w, h = font_resize.getsize(tower_cleared_floor_num_text+"阶")
-    draw.text((575 - w, 945), tower_cleared_floor_num_text +
+    draw.text((575 - w, 985), tower_cleared_floor_num_text +
               "阶", font_black, font_resize)
     w, h = font_resize.getsize(tower_cleared_ex_quest_count_text)
-    draw.text((575 - w, 980), tower_cleared_ex_quest_count_text,
+    draw.text((575 - w, 1020), tower_cleared_ex_quest_count_text,
               font_black, font_resize)
 
     # JAG: Display viewer_id in a proper way
@@ -206,7 +210,7 @@ def _generate_info_pic_internal(data, pinfo):
     viewer_id_arr = f'{data["user_info"]["viewer_id"]:,}'.split(',')
     viewer_id_str = "  ".join(viewer_id_arr)
     w, h = font.getsize(viewer_id_str)
-    draw.text((138 + (460 - 138) / 2 - w / 2, 1038), viewer_id_str,
+    draw.text((138 + (460 - 138) / 2 - w / 2, 1078), viewer_id_str,
               (255, 255, 255, 255), font)
 
     return im
